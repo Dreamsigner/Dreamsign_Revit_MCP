@@ -17,6 +17,6 @@
   <Target Name="StageRevitAddin" AfterTargets="Publish" Condition="'$(IncludeRevitAddin)' == 'true'">
     <PropertyGroup><RevitAddinDirectory Condition="'$(RevitAddinDirectory)' == ''">$(MSBuildProjectDirectory)/../Dreamsign.Revit/bin/$(Configuration)/net10.0-windows</RevitAddinDirectory></PropertyGroup>
     <Error Condition="!Exists('$(RevitAddinDirectory)/Dreamsign.Revit.dll')" Text="Build Dreamsign.Revit in this configuration before publishing the distribution." />
-    <Copy SourceFiles="$(RevitAddinDirectory)/Dreamsign.Revit.dll;$(RevitAddinDirectory)/Dreamsign.Contracts.dll" DestinationFolder="$(PublishDir)addin" />
+    <Copy SourceFiles="$(RevitAddinDirectory)/Dreamsign.Revit.dll;$(RevitAddinDirectory)/Dreamsign.Contracts.dll;$(RevitAddinDirectory)/Dreamsign.Desktop.dll;$(RevitAddinDirectory)/Tomlyn.dll" DestinationFolder="$(PublishDir)addin" />
   </Target>
 </Project>

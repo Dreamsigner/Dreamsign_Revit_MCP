@@ -43,7 +43,7 @@ public sealed class BridgeRuntime(StateStore store, IBridgeTransport transport, 
         var target = store.Target;
         var found = await TargetResolver.ResolveAsync(target, transport, cancellationToken);
         if (operation == "discover_instances" || found["success"]?.GetValue<bool>() != true) return found;
-        if (Features.Contains(operation) && found["bridge_version"]?.ToString() is not ("0.3.0" or ToolCatalog.Version)) return ToolCatalog.Error("UPGRADE_REQUIRED", "Load bridge 0.3 or 0.4 for this operation");
+        if (Features.Contains(operation) && found["bridge_version"]?.ToString() is not ("0.3.0" or "0.4.0" or ToolCatalog.Version)) return ToolCatalog.Error("UPGRADE_REQUIRED", "Load bridge 0.3 or later for this operation");
         var input = (JsonObject)arguments.DeepClone();
         var full = input["response_mode"]?.ToString() == "full";
         input.Remove("response_mode");

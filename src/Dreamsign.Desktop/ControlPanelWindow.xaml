@@ -1,0 +1,54 @@
+<Window x:Class="Dreamsign.Desktop.ControlPanelWindow"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ Title="Dreamsign MCP" Width="620" Height="745" MinWidth="560" MinHeight="650" WindowStartupLocation="CenterOwner"
+ Background="#F2F5F4" FontFamily="Segoe UI" FontSize="14" Foreground="#19352E">
+ <Window.Resources>
+  <Style TargetType="Button"><Setter Property="Padding" Value="16,10"/><Setter Property="Margin" Value="0,8,8,0"/><Setter Property="MinHeight" Value="42"/><Setter Property="Cursor" Value="Hand"/></Style>
+  <Style TargetType="ComboBox"><Setter Property="Padding" Value="8"/><Setter Property="Margin" Value="0,6,0,0"/><Setter Property="MinHeight" Value="38"/></Style>
+ </Window.Resources>
+ <ScrollViewer VerticalScrollBarVisibility="Auto">
+ <StackPanel Margin="26">
+  <TextBlock Text="DREAMSIGN" FontWeight="Bold" FontSize="12" Foreground="#527367"/>
+  <TextBlock Text="Votre projet, votre assistant." FontSize="26" FontWeight="SemiBold" Margin="0,5,0,6"/>
+  <TextBlock x:Name="BridgeStatus" Text="Bridge chargé" Foreground="#23634C" Margin="0,0,0,18"/>
+  <Border Background="White" CornerRadius="12" Padding="20" Margin="0,0,0,14">
+   <StackPanel>
+    <TextBlock Text="1. Choisir le projet de travail" FontSize="18" FontWeight="SemiBold"/>
+    <TextBlock Text="Projet actif dans cette instance" Foreground="#647970" Margin="0,12,0,3"/>
+    <TextBlock x:Name="ActiveProjectText" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+    <TextBlock x:Name="ActivePathText" Foreground="#647970" FontSize="12" TextTrimming="CharacterEllipsis" Margin="0,4,0,2"/>
+    <Button x:Name="UseProjectButton" Content="Utiliser ce projet" Click="SelectProject" HorizontalAlignment="Left" Background="#174D3C" Foreground="White" AutomationProperties.Name="Utiliser le projet Revit actif"/>
+    <TextBlock x:Name="TargetText" Margin="0,12,0,0" TextWrapping="Wrap"/>
+   </StackPanel>
+  </Border>
+  <Border Background="White" CornerRadius="12" Padding="20" Margin="0,0,0,14">
+   <StackPanel>
+    <TextBlock Text="2. Connecter votre assistant" FontSize="18" FontWeight="SemiBold"/>
+    <Grid Margin="0,10,0,4">
+     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="14"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+     <StackPanel><Label Target="{Binding ElementName=ClientChoice}" Content="Assistant" Padding="0"/>
+      <ComboBox x:Name="ClientChoice" SelectedIndex="0"><ComboBoxItem Content="Codex"/><ComboBoxItem Content="Claude Desktop"/><ComboBoxItem Content="Cursor"/></ComboBox>
+     </StackPanel>
+     <StackPanel Grid.Column="2"><Label Target="{Binding ElementName=ProfileChoice}" Content="Utilisation" Padding="0"/>
+      <ComboBox x:Name="ProfileChoice" SelectedIndex="2"><ComboBoxItem Content="Lecture seule"/><ComboBoxItem Content="Automatisation"/><ComboBoxItem Content="Modélisation"/></ComboBox>
+     </StackPanel>
+    </Grid>
+    <Button Content="Configurer la connexion" Click="ConnectClient" HorizontalAlignment="Left"/>
+    <TextBlock Text="Les réglages existants sont sauvegardés. Fermez ce panneau, puis rechargez la connexion MCP de votre assistant." Foreground="#647970" TextWrapping="Wrap" Margin="0,10,0,0" FontSize="12"/>
+   </StackPanel>
+  </Border>
+  <DockPanel><Button Content="Diagnostic" Click="Diagnose" DockPanel.Dock="Left"/>
+   <Button Content="Terminer" Click="ClosePanel" DockPanel.Dock="Right"/>
+   <TextBlock x:Name="ContactText" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="12" Foreground="#647970" Margin="8,8,0,0"/>
+  </DockPanel>
+  <Border Background="#E7EEEA" CornerRadius="6" Padding="12" Margin="0,12,0,6">
+   <TextBlock x:Name="FeedbackText" Text="Sélectionnez explicitement le projet que l’assistant peut utiliser." TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+  </Border>
+  <Expander Header="Paramètres avancés" Margin="0,10,0,0">
+   <StackPanel><TextBlock x:Name="StorageText" TextWrapping="Wrap" FontSize="12" Margin="0,10,0,0"/>
+    <Button Content="Copier la configuration pour un autre client" Click="CopyConfiguration" HorizontalAlignment="Left"/>
+   </StackPanel>
+  </Expander>
+ </StackPanel>
+ </ScrollViewer>
+</Window>

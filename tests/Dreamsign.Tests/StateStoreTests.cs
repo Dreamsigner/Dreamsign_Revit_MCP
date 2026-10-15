@@ -1,3 +1,4 @@
+using Dreamsign.Contracts;
 using System.Text.Json.Nodes;
 using Dreamsign.Server;
 using Xunit;

@@ -16,6 +16,8 @@ public sealed class InstallationTests : IDisposable
         Directory.CreateDirectory(plugin);
         File.WriteAllText(Path.Combine(plugin, "Dreamsign.Revit.dll"), "test");
         File.WriteAllText(Path.Combine(plugin, "Dreamsign.Contracts.dll"), "test");
+        File.WriteAllText(Path.Combine(plugin, "Dreamsign.Desktop.dll"), "test");
+        File.WriteAllText(Path.Combine(plugin, "Tomlyn.dll"), "test");
         var manifests = Path.Combine(directory, "manifests");
         var data = Path.Combine(directory, "data & files");
         var result = Installation.Install(plugin, manifests, data);

@@ -13,7 +13,8 @@ public sealed record ToolDefinition(string Name, string Description, JsonObject 
 
 public static class ToolCatalog
 {
-    public const string Version = "0.4.0";
+    public const string Version = "0.5.0";
+    public const string TestProjectPrefix = "Dreamsign_MCP_";
     public const string PipePrefix = "AstraRevitBridge-2027-";
     public const int RequestBytes = 262144, ResponseBytes = 1048576;
     private static readonly string[] Base = ["discover_instances", "get_project_state", "get_active_document", "ping_revit", "get_project_info", "get_levels", "query_elements", "validate_elements", "get_last_errors", "capture_snapshot", "read_snapshot", "diff_snapshots"];

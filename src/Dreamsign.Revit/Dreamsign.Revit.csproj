@@ -2,12 +2,15 @@
   <PropertyGroup>
     <TargetFramework>net10.0-windows</TargetFramework>
     <AssemblyName>Dreamsign.Revit</AssemblyName>
+    <UseWPF>true</UseWPF>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <RevitDirectory Condition="'$(RevitDirectory)' == ''">$(ProgramW6432)/Autodesk/Revit 2027</RevitDirectory>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../Dreamsign.Contracts/Dreamsign.Contracts.csproj" />
+    <ProjectReference Include="../Dreamsign.Desktop/Dreamsign.Desktop.csproj" />
     <Reference Include="RevitAPI"><HintPath>$(RevitDirectory)/RevitAPI.dll</HintPath><Private>false</Private><ExternallyResolved>true</ExternallyResolved></Reference>
     <Reference Include="RevitAPIUI"><HintPath>$(RevitDirectory)/RevitAPIUI.dll</HintPath><Private>false</Private><ExternallyResolved>true</ExternallyResolved></Reference>
   </ItemGroup>

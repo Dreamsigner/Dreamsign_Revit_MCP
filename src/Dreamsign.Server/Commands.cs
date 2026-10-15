@@ -11,6 +11,25 @@ public static class Commands
         JsonNode result;
         switch (options.Command)
         {
+            case "connect":
+                if (!Enum.TryParse<DesktopClient>(options.Require("client"), true, out var client) || !Enum.IsDefined(client)) throw new ArgumentException("Client inconnu : Codex, ClaudeDesktop ou Cursor attendu.");
+                var connection = ClientIntegration.Configure(client, ClientIntegration.ConfigurationPath(client),
+                    Path.Combine(AppContext.BaseDirectory,"Dreamsign.Revit.Mcp.exe"), store.DirectoryPath, options.Profile);
+                result = new JsonObject { ["success"] = true, ["configuration"] = connection.Path, ["backup"] = connection.Backup };
+                break;
+            case "setup-install":
+                result = SetupLifecycle.Register(Path.Combine(AppContext.BaseDirectory,"addin"), options.Values.GetValueOrDefault("manifest-dir") ?? Installation.DefaultManifestDirectory,
+                    store.DirectoryPath, Path.Combine(AppContext.BaseDirectory,"Dreamsign.Revit.Mcp.exe"));
+                break;
+            case "setup-rollback":
+                result = SetupLifecycle.Rollback(options.Values.GetValueOrDefault("manifest-dir") ?? Installation.DefaultManifestDirectory, store.DirectoryPath);
+                break;
+            case "setup-commit":
+                result = SetupLifecycle.Commit(store.DirectoryPath);
+                break;
+            case "setup-uninstall":
+                result = SetupLifecycle.Unregister(options.Values.GetValueOrDefault("manifest-dir") ?? Installation.DefaultManifestDirectory,store.DirectoryPath,Path.Combine(AppContext.BaseDirectory,"Dreamsign.Revit.Mcp.exe"));
+                break;
             case "configure":
                 using (var lease = store.AcquireLease())
                 {
@@ -31,10 +50,10 @@ public static class Commands
                 break;
             case "install":
                 result = Installation.Install(options.Values.GetValueOrDefault("plugin-dir") ?? Path.Combine(AppContext.BaseDirectory, "addin"),
-                    Installation.DefaultManifestDirectory, store.DirectoryPath, options.ReplaceExisting);
+                    options.Values.GetValueOrDefault("manifest-dir") ?? Installation.DefaultManifestDirectory, store.DirectoryPath, options.ReplaceExisting);
                 break;
             case "uninstall":
-                result = Installation.Uninstall(Installation.DefaultManifestDirectory, store.DirectoryPath);
+                result = Installation.Uninstall(options.Values.GetValueOrDefault("manifest-dir") ?? Installation.DefaultManifestDirectory, store.DirectoryPath);
                 break;
             default: throw new ArgumentException("Unknown command");
         }

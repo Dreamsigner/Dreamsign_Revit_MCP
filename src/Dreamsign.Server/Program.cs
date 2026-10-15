@@ -55,7 +55,7 @@ public static class Program
     }
 
     public const string Help = """
-        Dreamsign Revit MCP 0.4.0 — C# / .NET 10 / Revit 2027
+        Dreamsign Revit MCP 0.5.0 — C# / .NET 10 / Revit 2027
         serve       [--profile inspection|workflow|modeling|diagnostic|full] [--data-dir DIR]
         configure   --document TITLE --path ABSOLUTE_RVT [--pid PID] [--data-dir DIR]
         doctor      [--data-dir DIR]                 Read-only target/bridge check
