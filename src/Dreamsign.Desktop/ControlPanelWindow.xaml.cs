@@ -66,4 +66,3 @@ public partial class ControlPanelWindow : Window
         FeedbackText.Text = "Configuration copiée. Ajoutez-la à votre client compatible MCP.";
     });
 }
-

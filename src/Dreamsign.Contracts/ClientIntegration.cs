@@ -113,7 +113,7 @@ public static class ClientIntegration
     {
         if (Path.GetFileName(command) == "Dreamsign.Revit.Mcp.exe") return true;
         return Path.GetFileName(command) is "node" or "node.exe" && args is not null &&
-            args.Cast<object>().Any(a => a.ToString()!.Replace('\\', '/').EndsWith("/AstraRevitBridge/server.mjs", StringComparison.OrdinalIgnoreCase));
+            args.Cast<object?>().Any(a => a?.ToString()?.Replace('\\', '/').EndsWith("/AstraRevitBridge/server.mjs", StringComparison.OrdinalIgnoreCase) == true);
     }
     private static string? Write(string path, string text, string dataDirectory)
     {
@@ -158,4 +158,3 @@ public static class LocalSettings
         return executable is not null && Path.IsPathFullyQualified(executable) && Path.GetFileName(executable) == "Dreamsign.Revit.Mcp.exe" && File.Exists(executable) ? executable : null;
     }
 }
-

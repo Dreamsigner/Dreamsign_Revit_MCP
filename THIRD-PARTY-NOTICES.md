@@ -22,3 +22,15 @@ Autodesk Revit and its SDK assemblies are proprietary products. They are not
 distributed in this repository or copied into the plugin package. A licensed
 local Revit 2027 installation is required. This is an independent project and
 does not imply endorsement by Autodesk or the MCP SDK maintainers.
+
+- **Tomlyn 0.19.0**, copyright Alexandre Mutel: BSD 2-Clause, used for preserving
+  and updating client TOML configuration. Source: https://github.com/xoofx/Tomlyn/tree/0.19.0
+  License: `licenses/Tomlyn-BSD-2-Clause.txt`.
+- **WiX Toolset / Burn 6.0.2**, .NET Foundation and contributors: Microsoft
+  Reciprocal License, with its terms reproduced in
+  `licenses/WiX-MS-RL.txt`. Corresponding source:
+  https://github.com/wixtoolset/wix/tree/b3f340393117094a75ea8ced77f2357e4aa095e7
+  The development tools' binary distribution also includes an Open Source
+  Maintenance Fee agreement, reproduced in `installer/OSMFEULA.txt` in the source
+  repository. Developers must review those terms for their use of the build
+  tools. No paid service or purchase is performed by the application installer.

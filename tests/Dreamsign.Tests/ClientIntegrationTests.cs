@@ -64,4 +64,3 @@ public sealed class ClientIntegrationTests : IDisposable
         Assert.False(File.Exists(store.StatePath));
     }
 }
-

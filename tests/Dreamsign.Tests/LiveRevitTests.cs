@@ -42,6 +42,7 @@ public sealed class LiveRevitTests
         Assert.Equal(target.Document, document["document"]!.ToString());
         Assert.Equal(Path.GetFullPath(target.Path), Path.GetFullPath(document["path"]!.ToString()), ignoreCase: true);
         Assert.Equal(ToolCatalog.Version, document["bridge_version"]!.ToString());
+        Assert.True(document["ui_available"]!.GetValue<bool>());
         var levels = await client.CallToolAsync("get_levels", cancellationToken: deadline.Token);
         Assert.NotEqual(true, levels.IsError);
         Assert.True(JsonNode.Parse(Assert.IsType<TextContentBlock>(Assert.Single(levels.Content)).Text)!["count"]!.GetValue<int>() > 0);

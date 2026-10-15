@@ -58,6 +58,7 @@ public static class Program
         Dreamsign Revit MCP 0.5.0 — C# / .NET 10 / Revit 2027
         serve       [--profile inspection|workflow|modeling|diagnostic|full] [--data-dir DIR]
         configure   --document TITLE --path ABSOLUTE_RVT [--pid PID] [--data-dir DIR]
+        connect     --client Codex|ClaudeDesktop|Cursor [--profile PROFILE] [--data-dir DIR]
         doctor      [--data-dir DIR]                 Read-only target/bridge check
         install     [--plugin-dir DIR] [--replace-existing] [--data-dir DIR]
         uninstall   [--data-dir DIR]                 Remove only this manifest

@@ -50,7 +50,7 @@ Cet exemple est destiné à set_window_sills. Son résultat contient un plan_id 
 
 La version locale initiale a été validée dans Revit 2027.2. Cette distribution portable doit être validée dans un projet de test après installation ; les résultats et modèles locaux ne sont pas publiés.
 
-features.test.mjs vérifie profils, prédicats, frontières de validation, résumés de plans, blocage d’une ancienne DLL, registre et réduction du catalogue. live-features.test.mjs est limité au projet AstraBridge-Test-* : géométrie temporaire, filtres, preview annulée, invalidation, diff, refus de replay, allèges, repères, étiquettes de pièces, nettoyage et sauvegarde.
+features.test.mjs vérifie profils, prédicats, frontières de validation, résumés de plans, blocage d’une ancienne DLL, registre et réduction du catalogue. live-features.test.mjs est limité au projet Dreamsign_MCP_* : géométrie temporaire, filtres, preview annulée, invalidation, diff, refus de replay, allèges, repères, étiquettes de pièces, nettoyage et sauvegarde.
 
 Le scénario réel contient une modification indépendante via une autre commande MCP qui déclenche DocumentChanged ; il ne simule pas un clic manuel dans Revit. Les collisions 3D et conformité réglementaire restent hors de ce lot. Le diff ne couvre que les valeurs capturées, pas tous les paramètres cachés du modèle. La compatibilité des autres versions de Revit n’est pas revendiquée.
 

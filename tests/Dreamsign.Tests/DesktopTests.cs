@@ -65,4 +65,3 @@ public sealed class DesktopTests
         throw new InvalidOperationException("Button not found");
     }
 }
-

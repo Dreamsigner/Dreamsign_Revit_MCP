@@ -47,4 +47,3 @@ public sealed class SetupLifecycleTests : IDisposable
         Assert.Equal("changed",File.ReadAllText(manifest));
     }
 }
-
