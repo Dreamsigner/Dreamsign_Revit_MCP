@@ -29,6 +29,8 @@ Seule la solution complète exige Revit 2027. Les tests hors Revit et le serveur
 
 Les `packages.lock.json` fixent versions et empreintes. Une mise à jour intentionnelle restaure sans `--locked-mode`, examine les changements puis relance les tests.
 
+La publication autonome utilise séparément `packages.publish.lock.json` : ses identifiants de runtime et l’outil ILLink ajouté par le SDK diffèrent de la compilation ordinaire. Les deux configurations sont verrouillées en CI ; publier ne réécrit pas le verrou des tests.
+
 Les tests couvrent contrats, profils, refus d’arguments, ciblage, résumés d’erreurs, état local, installation, limites de pipe, identité des réponses, délais et échange stdio avec le client MCP officiel. Les pipes simulés emploient des identifiants hors plage des PID Windows pour ne pas contacter Revit.
 
 ## Test réel volontaire
