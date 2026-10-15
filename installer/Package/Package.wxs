@@ -1,0 +1,58 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+ <Package Name="Dreamsign Revit MCP" Manufacturer="Dreamsigner" Version="0.5.0" Language="1036"
+  UpgradeCode="F7EC557A-EE37-4563-8791-524DF4689829" Scope="perUser">
+  <MajorUpgrade DowngradeErrorMessage="Une version plus récente de Dreamsign Revit MCP est déjà installée." Schedule="afterInstallInitialize"/>
+  <MediaTemplate EmbedCab="yes"/>
+  <Launch Condition="NOT ALLUSERS" Message="Installez Dreamsign Revit MCP uniquement pour votre compte utilisateur."/>
+  <Property Id="MSIRESTARTMANAGERCONTROL" Value="Disable"/>
+  <Property Id="REBOOT" Value="ReallySuppress"/>
+  <StandardDirectory Id="LocalAppDataFolder">
+   <Directory Id="UserPrograms" Name="Programs"><Directory Id="DreamsignPrograms" Name="DreamsignRevitMCP">
+    <Directory Id="INSTALLFOLDER" Name="0.5.0">
+     <Component Id="ServerPayload" Guid="5A2A9CD4-9456-4A11-8644-60AA49B02C44">
+      <File Id="ServerExecutable" Source="$(var.PayloadDirectory)\Dreamsign.Revit.Mcp.exe"/>
+      <File Source="$(var.PayloadDirectory)\README.md"/>
+      <File Source="$(var.PayloadDirectory)\LICENSE"/>
+      <File Source="$(var.PayloadDirectory)\THIRD-PARTY-NOTICES.md"/>
+      <RegistryValue Root="HKCU" Key="Software\Dreamsigner\RevitMCP\0.5.0" Name="Server" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes"/>
+      <RemoveFolder Id="RemoveVersion" On="uninstall"/>
+      <RemoveFolder Id="RemoveProgramsRoot" Directory="DreamsignPrograms" On="uninstall"/>
+      <RemoveFolder Id="RemoveEmptyUserPrograms" Directory="UserPrograms" On="uninstall"/>
+     </Component>
+     <Directory Id="AddinPayloadDirectory" Name="addin">
+      <Component Id="AddinPayload" Guid="02AFFFAB-F08A-44CB-AA44-40EEFAD0B085">
+       <File Source="$(var.PayloadDirectory)\addin\Dreamsign.Revit.dll"/>
+       <File Source="$(var.PayloadDirectory)\addin\Dreamsign.Contracts.dll"/>
+       <File Source="$(var.PayloadDirectory)\addin\Dreamsign.Desktop.dll"/>
+       <File Source="$(var.PayloadDirectory)\addin\Tomlyn.dll"/>
+       <RegistryValue Root="HKCU" Key="Software\Dreamsigner\RevitMCP\0.5.0" Name="Plugin" Type="integer" Value="1" KeyPath="yes"/>
+       <RemoveFolder Id="RemoveAddinPayload" On="uninstall"/>
+      </Component>
+     </Directory>
+     <Directory Id="LicenseDirectory" Name="licenses">
+      <Component Id="LicensePayload" Guid="99CC222B-1830-4DB3-B02F-56699A408834">
+       <File Source="$(var.PayloadDirectory)\licenses\DOTNET-LICENSE.txt"/>
+       <File Source="$(var.PayloadDirectory)\licenses\DOTNET-ThirdPartyNotices.txt"/>
+       <File Source="$(var.PayloadDirectory)\licenses\MCP-Apache-2.0.txt"/>
+       <File Source="$(var.PayloadDirectory)\licenses\Tomlyn-BSD-2-Clause.txt"/>
+       <File Source="$(var.PayloadDirectory)\licenses\WiX-MS-RL.txt"/>
+       <RegistryValue Root="HKCU" Key="Software\Dreamsigner\RevitMCP\0.5.0" Name="Notices" Type="integer" Value="1" KeyPath="yes"/>
+       <RemoveFolder Id="RemoveLicenses" On="uninstall"/>
+      </Component>
+     </Directory>
+    </Directory>
+   </Directory></Directory>
+  </StandardDirectory>
+  <Feature Id="Complete" Title="Dreamsign Revit MCP"><ComponentRef Id="ServerPayload"/><ComponentRef Id="AddinPayload"/><ComponentRef Id="LicensePayload"/></Feature>
+  <CustomAction Id="RollbackRegistration" FileRef="ServerExecutable" ExeCommand="setup-rollback --data-dir &quot;[LocalAppDataFolder]DreamsignRevitMCP&quot; --manifest-dir &quot;[AppDataFolder]Autodesk\Revit\Addins\2027&quot;" Execute="rollback" Impersonate="yes" Return="check"/>
+  <CustomAction Id="RegisterPlugin" FileRef="ServerExecutable" ExeCommand="setup-install --data-dir &quot;[LocalAppDataFolder]DreamsignRevitMCP&quot; --manifest-dir &quot;[AppDataFolder]Autodesk\Revit\Addins\2027&quot;" Execute="deferred" Impersonate="yes" Return="check"/>
+  <CustomAction Id="CommitRegistration" FileRef="ServerExecutable" ExeCommand="setup-commit --data-dir &quot;[LocalAppDataFolder]DreamsignRevitMCP&quot;" Execute="commit" Impersonate="yes" Return="check"/>
+  <CustomAction Id="UnregisterPlugin" FileRef="ServerExecutable" ExeCommand="setup-uninstall --data-dir &quot;[LocalAppDataFolder]DreamsignRevitMCP&quot; --manifest-dir &quot;[AppDataFolder]Autodesk\Revit\Addins\2027&quot;" Execute="deferred" Impersonate="yes" Return="check"/>
+  <InstallExecuteSequence>
+   <Custom Action="RollbackRegistration" After="InstallFiles" Condition="NOT (REMOVE~=&quot;ALL&quot;)"/>
+   <Custom Action="RegisterPlugin" After="RollbackRegistration" Condition="NOT (REMOVE~=&quot;ALL&quot;)"/>
+   <Custom Action="CommitRegistration" After="RegisterPlugin" Condition="NOT (REMOVE~=&quot;ALL&quot;)"/>
+   <Custom Action="UnregisterPlugin" Before="RemoveFiles" Condition="REMOVE~=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE"/>
+  </InstallExecuteSequence>
+ </Package>
+</Wix>

@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dreamsign.Tests", "tests\Dr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dreamsign.Revit", "src\Dreamsign.Revit\Dreamsign.Revit.csproj", "{771FDFA0-B398-4135-832E-568CDD72461B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dreamsign.Desktop", "src\Dreamsign.Desktop\Dreamsign.Desktop.csproj", "{030C728C-222A-409A-BD2B-65913591C6B4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,18 @@ Global
 		{771FDFA0-B398-4135-832E-568CDD72461B}.Release|x64.Build.0 = Release|Any CPU
 		{771FDFA0-B398-4135-832E-568CDD72461B}.Release|x86.ActiveCfg = Release|Any CPU
 		{771FDFA0-B398-4135-832E-568CDD72461B}.Release|x86.Build.0 = Release|Any CPU
+		{030C728C-222A-409A-BD2B-65913591C6B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{030C728C-222A-409A-BD2B-65913591C6B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{030C728C-222A-409A-BD2B-65913591C6B4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{030C728C-222A-409A-BD2B-65913591C6B4}.Debug|x64.Build.0 = Debug|Any CPU
+		{030C728C-222A-409A-BD2B-65913591C6B4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{030C728C-222A-409A-BD2B-65913591C6B4}.Debug|x86.Build.0 = Debug|Any CPU
+		{030C728C-222A-409A-BD2B-65913591C6B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{030C728C-222A-409A-BD2B-65913591C6B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{030C728C-222A-409A-BD2B-65913591C6B4}.Release|x64.ActiveCfg = Release|Any CPU
+		{030C728C-222A-409A-BD2B-65913591C6B4}.Release|x64.Build.0 = Release|Any CPU
+		{030C728C-222A-409A-BD2B-65913591C6B4}.Release|x86.ActiveCfg = Release|Any CPU
+		{030C728C-222A-409A-BD2B-65913591C6B4}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -82,5 +96,6 @@ Global
 		{FAA43E19-0418-4C42-84AB-CF60D7E64742} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{C8C9BF8A-B2BD-4137-B95A-91892B52A344} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{771FDFA0-B398-4135-832E-568CDD72461B} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{030C728C-222A-409A-BD2B-65913591C6B4} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net10.0": {
+    "net10.0-windows7.0": {
       "Microsoft.NET.Test.Sdk": {
         "type": "Direct",
         "requested": "[18.0.1, )",
@@ -284,8 +284,7 @@
           "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.13",
           "Microsoft.Extensions.Logging": "10.0.13",
           "Microsoft.Extensions.Logging.Abstractions": "10.0.13",
-          "Microsoft.Extensions.Options": "10.0.13",
-          "System.Diagnostics.EventLog": "10.0.13"
+          "Microsoft.Extensions.Options": "10.0.13"
         }
       },
       "Microsoft.Extensions.Logging.EventSource": {
@@ -364,10 +363,10 @@
         "resolved": "13.0.3",
         "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
       },
-      "System.Diagnostics.EventLog": {
+      "Tomlyn": {
         "type": "Transitive",
-        "resolved": "10.0.13",
-        "contentHash": "DkNjtQyPR5Ud/zHnWHdsOuKbFRL9nIC92Q76z0NmHVDoQm40toLtsGFTIWq7toBoVa6fo/DInL3PLxY3Asixyw=="
+        "resolved": "0.19.0",
+        "contentHash": "GlI2o8R8jbZIaE+YX6uA/VoAOH7zIxYeqxDm7jHW2hqUhuB+q19oKold35FkMuv8IZDoCqsTMolaBv2eBLBmrQ=="
       },
       "xunit.abstractions": {
         "type": "Transitive",
@@ -410,12 +409,21 @@
         }
       },
       "dreamsign.contracts": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "Tomlyn": "[0.19.0, )"
+        }
+      },
+      "dreamsign.desktop": {
+        "type": "Project",
+        "dependencies": {
+          "Dreamsign.Contracts": "[0.5.0, )"
+        }
       },
       "Dreamsign.Revit.Mcp": {
         "type": "Project",
         "dependencies": {
-          "Dreamsign.Contracts": "[0.4.0, )",
+          "Dreamsign.Contracts": "[0.5.0, )",
           "Microsoft.Extensions.Hosting": "[10.0.13, )",
           "ModelContextProtocol": "[2.2.0, )"
         }

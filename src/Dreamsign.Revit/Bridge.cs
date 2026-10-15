@@ -22,8 +22,14 @@ public class App : IExternalApplication {
     static ExternalEvent evt;
     static Handler handler;
     static Task worker;
+    private static DateTime? lastContactUtc;
+    internal static DateTime? LastContactUtc { get { lock(Gate)return lastContactUtc; } set { lock(Gate)lastContactUtc=value; } }
+    internal static bool PanelRegistered;
     public Result OnStartup(UIControlledApplication app) {
         Operations=ToolCatalog.Commands.ToArray();
+        var panel=app.CreateRibbonPanel(Tab.AddIns,"Dreamsign MCP");
+        panel.AddItem(new PushButtonData("DreamsignMCPControl","Dreamsign\nMCP",typeof(App).Assembly.Location,typeof(ControlPanelCommand).FullName));
+        PanelRegistered=true;
         app.ControlledApplication.DocumentClosing += (sender, args) => Handler.Forget(args.Document);
         app.ControlledApplication.DocumentChanged += (sender,args) => Handler.Changed(args.GetDocument());
         handler = new Handler(); evt = ExternalEvent.Create(handler); stop = new CancellationTokenSource();
@@ -58,6 +64,7 @@ public class App : IExternalApplication {
                             else response=await job.Done.Task;
                         } catch(Exception ex) { response=Error("INVALID_REQUEST",ex.Message); }
                         response["request_id"]=id;
+                        if(response["success"]?.GetValue<bool>()==true)LastContactUtc=DateTime.UtcNow;
                         Log(op,id,start,response);
                         var output=Encoding.UTF8.GetBytes(response.ToJsonString()+"\n");
                         await pipe.WriteAsync(output.AsMemory(),deadline.Token);
@@ -116,7 +123,7 @@ partial class Handler : IExternalEventHandler {
         string op=Str(req,"operation");var a=req["arguments"]?.AsObject()??new JsonObject();var d=ui.ActiveUIDocument?.Document;
         if(op=="create_test_project"){
             if(d!=null)throw new InvalidOperationException("TEST_REQUIRES_HOME: do not switch away from an existing project");
-            string name=Str(a,"name");if(name.Length<1||name.Length>80||!System.Text.RegularExpressions.Regex.IsMatch(name,"^[A-Za-z0-9_-]+$"))throw new ArgumentException("Invalid test name");
+            string name=Str(a,"name");if(!name.StartsWith(ToolCatalog.TestProjectPrefix,StringComparison.Ordinal)||name.Length>80||!System.Text.RegularExpressions.Regex.IsMatch(name,"^[A-Za-z0-9_-]+$"))throw new ArgumentException("Invalid test name");
             string template=Environment.GetEnvironmentVariable("ASTRA_REVIT_TEST_TEMPLATE");if(string.IsNullOrWhiteSpace(template)||!File.Exists(template)||!template.EndsWith(".rte",StringComparison.OrdinalIgnoreCase))throw new ArgumentException("Set ASTRA_REVIT_TEST_TEMPLATE to an existing RTE before starting Revit");string dir=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"DreamsignRevitMCP","test-projects");Directory.CreateDirectory(dir);string path=Path.Combine(dir,name+".rvt");if(File.Exists(path))throw new InvalidOperationException("Test file exists; refusing overwrite");
             var test=ui.Application.NewProjectDocument(template);try{test.SaveAs(path,new SaveAsOptions{OverwriteExistingFile=false});}finally{test.Close(false);}var opened=ui.OpenAndActivateDocument(path).Document;
             return new JsonObject{["success"]=true,["document"]=opened.Title,["path"]=opened.PathName,["pid"]=Environment.ProcessId,["document_token"]=Token(opened),["bridge_version"]=ToolCatalog.Version,["template"]=template};
@@ -126,7 +133,7 @@ partial class Handler : IExternalEventHandler {
         if(op=="ping_revit") return new JsonObject{["success"]=true,["pid"]=Environment.ProcessId,["revit_running"]=true,["addin_loaded"]=true,["available"]=true,["document_open"]=d!=null,["revit_version"]=ui.Application.VersionNumber,["build"]=ui.Application.VersionBuild,["previous_error"]=App.Errors.Count>0};
         if(op=="get_last_errors") {lock(App.Gate)return new JsonObject{["success"]=true,["errors"]=new JsonArray(App.Errors.Select(x=>(JsonNode)x.DeepClone()).ToArray())};}
         if(d==null)throw new InvalidOperationException("NO_ACTIVE_DOCUMENT");
-        if(op=="get_active_document")return new JsonObject{["success"]=true,["document"]=d.Title,["path"]=d.PathName,["pid"]=Environment.ProcessId,["bridge_version"]=ToolCatalog.Version,["revision"]=Revision(d),["document_token"]=Token(d),["revit_version"]=ui.Application.VersionNumber,["read_only"]=d.IsReadOnly,["is_family"]=d.IsFamilyDocument};
+        if(op=="get_active_document")return new JsonObject{["success"]=true,["document"]=d.Title,["path"]=d.PathName,["pid"]=Environment.ProcessId,["bridge_version"]=ToolCatalog.Version,["revision"]=Revision(d),["document_token"]=Token(d),["revit_version"]=ui.Application.VersionNumber,["read_only"]=d.IsReadOnly,["is_family"]=d.IsFamilyDocument,["ui_available"]=App.PanelRegistered};
         if(FeatureOperations.Contains(op))return FeatureDispatch(ui,d,op,a);
         if(op=="get_project_info"){if(a["save_document"]?.GetValue<bool>()==true)throw new ArgumentException("Use save_project for writes");var r=Adapter("ProjectInfo",d,a);r["document_token"]=Token(d);return r;}
         if(op=="save_project"||op=="run_workflow"){

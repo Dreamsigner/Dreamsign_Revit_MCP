@@ -13,7 +13,7 @@ public static class Installation
 
     public static JsonObject Install(string pluginDirectory, string manifestDirectory, string dataDirectory, bool replaceExisting = false)
     {
-        string[] files = ["Dreamsign.Revit.dll", "Dreamsign.Contracts.dll"];
+        string[] files = ["Dreamsign.Revit.dll", "Dreamsign.Contracts.dll", "Dreamsign.Desktop.dll", "Tomlyn.dll"];
         foreach (var file in files)
             if (!File.Exists(Path.Combine(pluginDirectory, file))) throw new ArgumentException("Missing plugin file: " + file);
         var manifest = Path.Combine(manifestDirectory, ManifestName);
@@ -47,7 +47,7 @@ public static class Installation
         return new() { ["success"] = true, ["removed"] = true, ["backup"] = backup, ["restart_required"] = true };
     }
 
-    private static bool IsOwned(string manifest, bool requireNewAssembly = false)
+    internal static bool IsOwned(string manifest, bool requireNewAssembly = false)
     {
         using var reader = XmlReader.Create(manifest, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null });
         var entries = XDocument.Load(reader).Root?.Elements("AddIn").ToArray();

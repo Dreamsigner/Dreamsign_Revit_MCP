@@ -2241,7 +2241,7 @@
   },
   {
     "name": "create_test_project",
-    "description": "Create and activate a new project from the configured architectural template in the local test folder. Requires explicit PID at Revit home; never overwrites existing files.",
+    "description": "Create a named Dreamsign_MCP_ test project from a configured template in an explicit Revit Home instance. Never overwrites existing files.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2253,7 +2253,7 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 80,
-          "pattern": "^[A-Za-z0-9_-]+$"
+          "pattern": "^Dreamsign_MCP_[A-Za-z0-9_-]+$"
         }
       },
       "required": [

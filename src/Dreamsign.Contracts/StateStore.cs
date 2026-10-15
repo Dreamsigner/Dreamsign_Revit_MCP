@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Dreamsign.Contracts;
 
-namespace Dreamsign.Server;
+namespace Dreamsign.Contracts;
 
 public sealed class StateStore(string directory)
 {
@@ -21,6 +21,13 @@ public sealed class StateStore(string directory)
         return JsonNode.Parse(File.ReadAllText(StatePath))!.AsObject();
     }
     public BridgeTarget Target => BridgeTarget.FromJson(Read()["target"]!.AsObject());
+    public void SelectProject(string document, string path, int pid, bool isFamily)
+    {
+        if (isFamily || !Path.IsPathFullyQualified(path) || !path.EndsWith(".rvt", StringComparison.OrdinalIgnoreCase) || !File.Exists(path))
+            throw new ArgumentException("Ouvrez un projet Revit enregistré avant de le sélectionner.");
+        using var lease = AcquireLease();
+        Configure(new(document, Path.GetFullPath(path), pid));
+    }
     public void Configure(BridgeTarget target)
     {
         target.Validate();

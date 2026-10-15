@@ -5,8 +5,9 @@
 ```text
 Dreamsign.Contracts (net10.0)
   ├─ Dreamsign.Server (net10.0, SDK MCP 2.2.0)
-  └─ Dreamsign.Revit (net10.0-windows, API Revit 2027 locale)
-Dreamsign.Tests → Server → Contracts
+  └─ Dreamsign.Desktop (net10.0-windows, WPF)
+Dreamsign.Revit → Desktop + Contracts + API Revit 2027 locale
+Dreamsign.Tests → Server + Desktop → Contracts
 ```
 
 `tool-catalog.json` est une ressource embarquée de Contracts : noms, descriptions, schémas et annotations. `ToolCatalog` définit les profils. Serveur et plugin lisent cette même ressource ; une modification du contrat exige des tests et leur recompilation.
@@ -35,9 +36,9 @@ Les tests couvrent contrats, profils, refus d’arguments, ciblage, résumés d�
 
 ## Test réel volontaire
 
-Le test crée un niveau temporaire, prévisualise puis applique une modification, vérifie l’invalidation d’une capture et le refus de rejouer le plan, compare les captures puis supprime son niveau. Il ne sauvegarde pas automatiquement. Une erreur de transport peut nécessiter une vérification manuelle des éléments préfixés `migration-test-`.
+Le test crée un niveau temporaire, prévisualise puis applique une modification, vérifie l’invalidation d’une capture et le refus de rejouer le plan, compare les captures puis supprime son niveau. Il ne sauvegarde pas automatiquement. Une erreur de transport peut nécessiter une vérification manuelle des éléments préfixés `Dreamsign_MCP_`.
 
-Préparez un projet dédié **AstraBridge-Test-*** enregistré et actif dans Revit 2027 avec le plugin **0.4** chargé. Configurez-le dans un dossier d’état réservé. Définissez dans l’environnement du terminal :
+Préparez un projet dédié **Dreamsign_MCP_*** enregistré et actif dans Revit 2027 avec le plugin **0.5** chargé. Configurez-le dans un dossier d’état réservé. Définissez dans l’environnement du terminal :
 
 | Variable | Valeur |
 |---|---|
@@ -59,13 +60,27 @@ Compilez le plugin en Release puis publiez :
 dotnet publish src/Dreamsign.Server/Dreamsign.Server.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeRevitAddin=true -o artifacts/win-x64
 ```
 
-L’exécutable intègre serveur et runtime .NET. Les deux DLL du plugin restent dans `addin` car elles doivent être chargées dans Revit, séparément du processus MCP. L’installateur copie uniquement ces DLL dans un dossier versionné, sauvegarde le manifeste remplacé et écrit le nouveau manifeste atomiquement. Il ne modifie pas les clients MCP.
+L’exécutable intègre serveur et runtime .NET. `addin` contient le plugin, Contracts, Desktop et Tomlyn ; aucune DLL Autodesk n’est distribuée. Pour construire l’installateur complet après publication du serveur :
+
+```text
+dotnet build installer/Bundle/Dreamsign.Setup.wixproj -c Release
+```
+
+Le résultat est `installer/Bundle/bin/Release/Dreamsign_MCP_Setup_0.5.0.exe`. Le bundle WiX/Burn 6.0.2 contient un MSI utilisateur. Windows Installer possède les fichiers sous `%LOCALAPPDATA%/Programs/DreamsignRevitMCP/0.5.0` ; ses actions C# réversibles enregistrent les DLL dans un cache versionné et sauvegardent le manifeste existant. Le rollback restaure le manifeste et le reçu d’installation. La désinstallation ne retire les configurations clientes que lorsqu’elles pointent vers son exécutable exact. Modèles, état et rapports restent conservés.
+
+Le gestionnaire de redémarrage est désactivé et les redémarrages forcés supprimés. Le MSI interdit `ALLUSERS` : les avertissements ICE91 signalent des chemins volontairement utilisateur, et non une distribution pour tous les comptes. Les autres contrôles MSI restent actifs. Pour une nouvelle version changeant les dossiers et clés de composants, renouveler leurs GUID conformément aux règles Windows Installer ; ne pas modifier une release déjà publiée. Une reconstruction locale de la même version se teste après désinstallation de la construction précédente, pas comme une mise à niveau.
+
+Le serveur conserve les commandes avancées `configure`, `doctor`, `connect`, `install` et `uninstall`. Les commandes `setup-*` sont réservées au cycle MSI. L’interface normale est **Compléments → Dreamsign MCP** : fenêtre modale de configuration, à fermer avec **Terminer** avant les appels de l’assistant. Le bouton ne change aucun élément du modèle ; le ciblage et la configuration partagent le même verrou que le serveur.
+
+Les paramètres des clients Codex (TOML), Claude Desktop et Cursor (JSON) sont sauvegardés puis mis à jour par C#. Tomlyn conserve les données et commentaires TOML ; les autres serveurs et réglages sont conservés. Une entrée étrangère n’est pas écrasée. Les ACL existantes sont conservées lors du remplacement atomique d’un fichier de configuration.
+
+Sources : [WiX/Burn](https://docs.firegiant.com/wix/tools/burn/), [actions MSI](https://docs.firegiant.com/wix/schema/wxs/customaction/), [Restart Manager](https://learn.microsoft.com/en-us/windows/win32/msi/msirestartmanagercontrol), [Claude Desktop](https://modelcontextprotocol.io/docs/develop/connect-local-servers), [Cursor](https://cursor.com/docs/context/mcp). Conditions des outils WiX : voir `installer/OSMFEULA.txt`. La signature du programme doit utiliser un véritable certificat d’éditeur ; aucune signature n’est simulée.
 
 La CI Windows restaure les dépendances verrouillées, teste hors Revit et publie le **serveur seulement**. Elle ne valide pas le plugin dans Revit ; une distribution complète exige sa compilation locale.
 
 ## Données et compatibilité
 
-Le serveur 0.4 accepte le bridge 0.3 pendant la transition. Le nouveau plugin valide aussi les schémas reçus : l’ancien serveur avec le nouveau plugin n’est pas garanti. Mettre à jour les deux pour une installation normale.
+Le serveur 0.5 accepte les bridges 0.3 et 0.4 pendant la transition. Le nouveau plugin valide aussi les schémas reçus : l’ancien serveur avec le nouveau plugin n’est pas garanti. Mettre à jour les deux pour une installation normale.
 
 `configure` sauvegarde l’état quand le modèle change et réinitialise ses correspondances. Un changement de PID les conserve. L’ancien `project-state.json` peut être utilisé avec `--data-dir` pointant sur son dossier, après sauvegarde et vérification de sa cible. Aucun chemin de modèle n’est compilé dans le programme.
 

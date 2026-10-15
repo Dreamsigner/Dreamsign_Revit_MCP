@@ -12,7 +12,7 @@ public sealed class LiveRevitFactAttribute : FactAttribute
     public LiveRevitFactAttribute()
     {
         if (Environment.GetEnvironmentVariable("DREAMSIGN_RUN_REVIT_TESTS") != "1")
-            Skip = "Opt-in only: requires bridge 0.4 and a dedicated saved AstraBridge-Test-* project";
+            Skip = "Opt-in only: requires bridge 0.5 and a dedicated saved Dreamsign_MCP_* project";
     }
 }
 
@@ -24,7 +24,7 @@ public sealed class LiveRevitTests
         var data = Environment.GetEnvironmentVariable("DREAMSIGN_REVIT_TEST_DATA_DIR")
             ?? throw new InvalidOperationException("Configure the test data directory");
         var target = new StateStore(data).Target;
-        Assert.StartsWith("AstraBridge-Test-", target.Document);
+        Assert.StartsWith("Dreamsign_MCP_", target.Document);
         var executable = Environment.GetEnvironmentVariable("DREAMSIGN_TEST_SERVER_EXE")
             ?? throw new InvalidOperationException("Set DREAMSIGN_TEST_SERVER_EXE to the published server executable");
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(45));
@@ -41,7 +41,8 @@ public sealed class LiveRevitTests
         var document = JsonNode.Parse(Assert.IsType<TextContentBlock>(Assert.Single(response.Content)).Text)!;
         Assert.Equal(target.Document, document["document"]!.ToString());
         Assert.Equal(Path.GetFullPath(target.Path), Path.GetFullPath(document["path"]!.ToString()), ignoreCase: true);
-        Assert.Equal("0.4.0", document["bridge_version"]!.ToString());
+        Assert.Equal(ToolCatalog.Version, document["bridge_version"]!.ToString());
+        Assert.True(document["ui_available"]!.GetValue<bool>());
         var levels = await client.CallToolAsync("get_levels", cancellationToken: deadline.Token);
         Assert.NotEqual(true, levels.IsError);
         Assert.True(JsonNode.Parse(Assert.IsType<TextContentBlock>(Assert.Single(levels.Content)).Text)!["count"]!.GetValue<int>() > 0);
@@ -53,8 +54,8 @@ public sealed class LiveRevitTests
         var data = Environment.GetEnvironmentVariable("DREAMSIGN_REVIT_TEST_DATA_DIR")
             ?? throw new InvalidOperationException("DREAMSIGN_REVIT_TEST_DATA_DIR must point to a configured test target");
         var store = new StateStore(data);
-        Assert.StartsWith("AstraBridge-Test-", store.Target.Document);
-        Assert.StartsWith("AstraBridge-Test-", Path.GetFileNameWithoutExtension(store.Target.Path));
+        Assert.StartsWith("Dreamsign_MCP_", store.Target.Document);
+        Assert.StartsWith("Dreamsign_MCP_", Path.GetFileNameWithoutExtension(store.Target.Path));
         var runtime = new BridgeRuntime(store, new NamedPipeTransport(), "full");
         async Task<JsonObject> Call(string op, JsonObject args)
         {
@@ -63,9 +64,9 @@ public sealed class LiveRevitTests
         }
         var document = await Call("get_active_document", new());
         Assert.True(document["success"]!.GetValue<bool>(), document.ToJsonString());
-        Assert.Equal("0.4.0", document["bridge_version"]!.ToString());
+        Assert.Equal(ToolCatalog.Version, document["bridge_version"]!.ToString());
         var token = document["document_token"]!.ToString();
-        var source = "migration-test-" + Guid.NewGuid().ToString("N");
+        var source = "Dreamsign_MCP_" + Guid.NewGuid().ToString("N");
         string? uid = null;
         try
         {
