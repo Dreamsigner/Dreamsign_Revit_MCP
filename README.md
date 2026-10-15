@@ -9,7 +9,7 @@ Dreamsign Revit MCP fournit 24 outils pour **Revit 2027 sur Windows** : consulte
 
 La version **0.4.0** utilise C#/.NET 10 et le SDK MCP officiel. Le serveur, le plugin, l’installation et les tests n’exigent ni Node.js ni scripts PowerShell. JSON reste un format de données.
 
-> Validation : compilation contre Revit 2027 et tests automatisés hors Revit. La validation du plugin 0.4 chargé dans Revit reste à effectuer sur un projet de test ; les vérifications historiques de la version 0.3 ne la remplacent pas.
+> Validation : compilation contre Revit 2027, 40 tests hors Revit et essais natifs de la version 0.4 dans un projet dédié sous Revit 2027.2. Les essais portent sur la connexion MCP, les niveaux, la prévisualisation, les captures et le nettoyage ; ils ne constituent pas une validation exhaustive de tous les objets BIM.
 
 ```mermaid
 flowchart LR

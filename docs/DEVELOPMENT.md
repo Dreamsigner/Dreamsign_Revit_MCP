@@ -43,6 +43,7 @@ Préparez un projet dédié **AstraBridge-Test-*** enregistré et actif dans Rev
 |---|---|
 | `DREAMSIGN_RUN_REVIT_TESTS` | `1` |
 | `DREAMSIGN_REVIT_TEST_DATA_DIR` | Chemin absolu du dossier d’état configuré pour ce test |
+| `DREAMSIGN_TEST_SERVER_EXE` | Chemin absolu de l’exécutable publié ; utilisé pour vérifier toute la chaîne MCP → Revit |
 
 ```text
 dotnet test tests/Dreamsign.Tests/Dreamsign.Tests.csproj -c Release --filter FullyQualifiedName~LiveRevitTests

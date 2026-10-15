@@ -1,6 +1,8 @@
 using System.Text.Json.Nodes;
 using Dreamsign.Contracts;
 using Dreamsign.Server;
+using ModelContextProtocol.Client;
+using ModelContextProtocol.Protocol;
 using Xunit;
 
 namespace Dreamsign.Tests;
@@ -16,6 +18,35 @@ public sealed class LiveRevitFactAttribute : FactAttribute
 
 public sealed class LiveRevitTests
 {
+    [LiveRevitFact]
+    public async Task PublishedMcpServerReadsTheActualTestDocument()
+    {
+        var data = Environment.GetEnvironmentVariable("DREAMSIGN_REVIT_TEST_DATA_DIR")
+            ?? throw new InvalidOperationException("Configure the test data directory");
+        var target = new StateStore(data).Target;
+        Assert.StartsWith("AstraBridge-Test-", target.Document);
+        var executable = Environment.GetEnvironmentVariable("DREAMSIGN_TEST_SERVER_EXE")
+            ?? throw new InvalidOperationException("Set DREAMSIGN_TEST_SERVER_EXE to the published server executable");
+        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(45));
+        var transport = new StdioClientTransport(new()
+        {
+            Name = "Dreamsign native integration",
+            Command = Path.GetFileName(executable), WorkingDirectory = Path.GetDirectoryName(executable),
+            Arguments = ["serve", "--profile", "inspection", "--data-dir", data],
+            InheritEnvironmentVariables = false, EnvironmentVariables = StdioClientTransportOptions.GetDefaultEnvironmentVariables()
+        });
+        await using var client = await McpClient.CreateAsync(transport, cancellationToken: deadline.Token);
+        var response = await client.CallToolAsync("get_active_document", cancellationToken: deadline.Token);
+        Assert.NotEqual(true, response.IsError);
+        var document = JsonNode.Parse(Assert.IsType<TextContentBlock>(Assert.Single(response.Content)).Text)!;
+        Assert.Equal(target.Document, document["document"]!.ToString());
+        Assert.Equal(Path.GetFullPath(target.Path), Path.GetFullPath(document["path"]!.ToString()), ignoreCase: true);
+        Assert.Equal("0.4.0", document["bridge_version"]!.ToString());
+        var levels = await client.CallToolAsync("get_levels", cancellationToken: deadline.Token);
+        Assert.NotEqual(true, levels.IsError);
+        Assert.True(JsonNode.Parse(Assert.IsType<TextContentBlock>(Assert.Single(levels.Content)).Text)!["count"]!.GetValue<int>() > 0);
+    }
+
     [LiveRevitFact]
     public async Task NativePreviewSnapshotInvalidationAndSingleUsePlan()
     {

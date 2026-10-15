@@ -37,17 +37,19 @@ dotnet run --project src/Dreamsign.Server -- --help
 
 ## Limites de migration
 
-L’installation actuellement chargée dans Revit reste en place. Le nouveau serveur accepte le bridge 0.3 pendant la transition. Le nouveau plugin annonce 0.4 et garde le protocole des pipes 2027. Une nouvelle validation du plugin chargé exige un redémarrage utilisateur de la seule instance ciblée.
+Le nouveau serveur accepte le bridge 0.3 pendant la transition. Le nouveau plugin annonce 0.4 et garde le protocole des pipes 2027. Un remplacement local du manifeste nécessite le rechargement du plugin dans l’instance ciblée ; les autres instances ouvertes ne sont pas fermées ni relancées.
 
 Les modèles, identifiants privés, logs, DLL Autodesk et caches NuGet ne sont pas publiés. Les noms d’outils et champs restent compatibles. JSON reste un format de données ; le catalogue embarqué remplace sa génération JavaScript. La licence reste MIT ; le SDK MCP conserve sa licence et ses notices propres.
 
 ## Validation de la migration
 
 - Comparaison sémantique des 24 définitions avec la version 0.3 : identiques, sauf le jeton désormais obligatoire pour `run_workflow`.
-- Release : compilation des quatre projets sans avertissement ; 40 tests hors Revit réussis. Le test réel volontaire reste désactivé et ne compte pas comme une réussite.
+- Release : compilation des quatre projets sans avertissement ; 40 tests hors Revit réussis. Les tests réels restent désactivés par défaut et sont comptés séparément.
 - Distribution Windows autonome produite avec le runtime .NET ; seuls `Dreamsign.Revit.dll` et `Dreamsign.Contracts.dll` sont placés dans `addin`. Aucun script JavaScript/PowerShell n'est requis.
 - L’exécutable autonome a également réussi l’initialisation, le catalogue et les appels stdio avec le client MCP officiel.
-- Plugin actuellement installé conservé. Aucune instance Revit n’était ouverte au contrôle de disponibilité : pas de validation réelle du plugin 0.4 dans cette session.
+- Après autorisation d’activation, le manifeste utilisateur et la seule entrée MCP concernée ont été sauvegardés puis remplacés. Le plugin 0.4 a répondu dans une copie dédiée sous Revit 2027.2 ; l’autre instance ouverte a été conservée.
+- Le test natif a créé puis supprimé son niveau temporaire, vérifié l’annulation de la prévisualisation, l’application, l’invalidation du snapshot, le diff historique et le refus de rejouer le plan. Aucune sauvegarde automatique du modèle n’a été demandée. Cette validation n’est pas une couverture exhaustive des catégories BIM.
+- Deux tests natifs réussis : cycle de modification contrôlé et lecture réelle via le client SDK connecté à l’exécutable autonome installé. Les 40 tests hors Revit et la publication autonome verrouillée ont également réussi sur GitHub Actions.
 - La revue a ajouté des contrôles de réponse JSON nulle, un verrou entre processus pour l’état local et la conservation des correspondances lors d’un simple changement de PID.
 
 Les téléchargements superflus des runtimes web/UI pendant la publication ont été supprimés via le paramètre MSBuild partagé `DisableTransitiveFrameworkReferenceDownloads`. Le serveur utilise uniquement le runtime de base.
