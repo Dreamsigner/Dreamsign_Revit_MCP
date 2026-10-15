@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
+using Dreamsign.Contracts;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.ExtensibleStorage;
@@ -22,7 +23,7 @@ public class App : IExternalApplication {
     static Handler handler;
     static Task worker;
     public Result OnStartup(UIControlledApplication app) {
-        var contract=JsonNode.Parse(File.ReadAllText(Path.Combine(Path.GetDirectoryName(typeof(App).Assembly.Location),"command-registry.json"))).AsObject();if(contract["version"]?.ToString()!="0.3.0")throw new InvalidOperationException("Command registry version mismatch");Operations=contract["commands"].AsArray().Select(x=>x.GetValue<string>()).ToArray();
+        Operations=ToolCatalog.Commands.ToArray();
         app.ControlledApplication.DocumentClosing += (sender, args) => Handler.Forget(args.Document);
         app.ControlledApplication.DocumentChanged += (sender,args) => Handler.Changed(args.GetDocument());
         handler = new Handler(); evt = ExternalEvent.Create(handler); stop = new CancellationTokenSource();
@@ -36,7 +37,7 @@ public class App : IExternalApplication {
     static async Task Serve(CancellationToken ct) {
         while(!ct.IsCancellationRequested) {
             try {
-                using(var pipe = new NamedPipeServerStream("AstraRevitBridge-2027-"+Environment.ProcessId, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly)) {
+                using(var pipe = new NamedPipeServerStream(ToolCatalog.PipePrefix+Environment.ProcessId, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly)) {
                     await pipe.WaitForConnectionAsync(ct);
                     using(var deadline = CancellationTokenSource.CreateLinkedTokenSource(ct)) {
                         deadline.CancelAfter(45000);
@@ -47,6 +48,7 @@ public class App : IExternalApplication {
                             var req=JsonNode.Parse(Encoding.UTF8.GetString(bytes.ToArray())).AsObject();
                             op=req["operation"]?.GetValue<string>()??""; id=req["request_id"]?.GetValue<string>()??"";
                             if(!Operations.Contains(op)) throw new ArgumentException("Unknown operation");
+                            SchemaValidator.Validate(req["arguments"] as JsonObject ?? new JsonObject(), ToolCatalog.Get(op).Schema);
                             var job=new Job { Request=req, Expires=DateTime.UtcNow.AddSeconds(25) };
                             handler.Pending=job;
                             var raised=evt.Raise();
@@ -90,14 +92,12 @@ partial class Handler : IExternalEventHandler {
     static string Str(JsonObject o,string k,string fallback="") { return o[k]?.GetValue<string>()??fallback; }
     static string Token(Document d) { string k=Key(d);if(!identities.TryGetValue(k,out var identity)){identity=new Identity();identities.Add(k,identity);}return identity.Token; }
     static JsonObject Ok() { return new JsonObject{["success"]=true}; }
-    static System.Reflection.Assembly adapterAssembly;
-    static DateTime adapterStamp;
-    static JsonObject Adapter(string method,Document d,JsonObject input) {
-        var path=Path.Combine(Path.GetDirectoryName(typeof(App).Assembly.Location),"AstraBimAdapter.dll");
-        var stamp=File.GetLastWriteTimeUtc(path);if(adapterAssembly==null||stamp!=adapterStamp){adapterAssembly=System.Reflection.Assembly.Load(File.ReadAllBytes(path));adapterStamp=stamp;}var asm=adapterAssembly;
-        try {return (JsonObject)asm.GetType("AstraBimAdapter.Actions").GetMethod(method).Invoke(null,new object[]{d,input});}
-        catch(System.Reflection.TargetInvocationException e){throw e.InnerException??e;}
-    }
+    static JsonObject Adapter(string method,Document d,JsonObject input) => method switch {
+        "Create" => AstraBimAdapter.Actions.Create(d,input),
+        "Describe" => AstraBimAdapter.Actions.Describe(d,input),
+        "ProjectInfo" => AstraBimAdapter.Actions.ProjectInfo(d,input),
+        _ => throw new ArgumentException("Unknown adapter operation")
+    };
     static JsonObject Describe(Element e) {
         var o=new JsonObject{["id"]=e.Id.Value,["unique_id"]=e.UniqueId,["name"]=e.Name,["category"]=e.Category?.Name};
         if(e is Level l) o["elevation_m"]=UnitUtils.ConvertFromInternalUnits(l.Elevation,UnitTypeId.Meters);
@@ -119,14 +119,14 @@ partial class Handler : IExternalEventHandler {
             string name=Str(a,"name");if(name.Length<1||name.Length>80||!System.Text.RegularExpressions.Regex.IsMatch(name,"^[A-Za-z0-9_-]+$"))throw new ArgumentException("Invalid test name");
             string template=Environment.GetEnvironmentVariable("ASTRA_REVIT_TEST_TEMPLATE");if(string.IsNullOrWhiteSpace(template)||!File.Exists(template)||!template.EndsWith(".rte",StringComparison.OrdinalIgnoreCase))throw new ArgumentException("Set ASTRA_REVIT_TEST_TEMPLATE to an existing RTE before starting Revit");string dir=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"DreamsignRevitMCP","test-projects");Directory.CreateDirectory(dir);string path=Path.Combine(dir,name+".rvt");if(File.Exists(path))throw new InvalidOperationException("Test file exists; refusing overwrite");
             var test=ui.Application.NewProjectDocument(template);try{test.SaveAs(path,new SaveAsOptions{OverwriteExistingFile=false});}finally{test.Close(false);}var opened=ui.OpenAndActivateDocument(path).Document;
-            return new JsonObject{["success"]=true,["document"]=opened.Title,["path"]=opened.PathName,["pid"]=Environment.ProcessId,["document_token"]=Token(opened),["bridge_version"]="0.3.0",["template"]=template};
+            return new JsonObject{["success"]=true,["document"]=opened.Title,["path"]=opened.PathName,["pid"]=Environment.ProcessId,["document_token"]=Token(opened),["bridge_version"]=ToolCatalog.Version,["template"]=template};
         }
         if(Str(req,"expected_document")==""||d==null||d.Title!=Str(req,"expected_document"))throw new InvalidOperationException("WRONG_DOCUMENT: target document must be active; no action executed");
         string expectedPath=Str(req,"expected_document_path");if(expectedPath!=""&&!string.Equals(Path.GetFullPath(d.PathName),Path.GetFullPath(expectedPath),StringComparison.OrdinalIgnoreCase))throw new InvalidOperationException("WRONG_DOCUMENT_PATH: no action executed");
         if(op=="ping_revit") return new JsonObject{["success"]=true,["pid"]=Environment.ProcessId,["revit_running"]=true,["addin_loaded"]=true,["available"]=true,["document_open"]=d!=null,["revit_version"]=ui.Application.VersionNumber,["build"]=ui.Application.VersionBuild,["previous_error"]=App.Errors.Count>0};
         if(op=="get_last_errors") {lock(App.Gate)return new JsonObject{["success"]=true,["errors"]=new JsonArray(App.Errors.Select(x=>(JsonNode)x.DeepClone()).ToArray())};}
         if(d==null)throw new InvalidOperationException("NO_ACTIVE_DOCUMENT");
-        if(op=="get_active_document")return new JsonObject{["success"]=true,["document"]=d.Title,["path"]=d.PathName,["pid"]=Environment.ProcessId,["bridge_version"]="0.3.0",["revision"]=Revision(d),["document_token"]=Token(d),["revit_version"]=ui.Application.VersionNumber,["read_only"]=d.IsReadOnly,["is_family"]=d.IsFamilyDocument};
+        if(op=="get_active_document")return new JsonObject{["success"]=true,["document"]=d.Title,["path"]=d.PathName,["pid"]=Environment.ProcessId,["bridge_version"]=ToolCatalog.Version,["revision"]=Revision(d),["document_token"]=Token(d),["revit_version"]=ui.Application.VersionNumber,["read_only"]=d.IsReadOnly,["is_family"]=d.IsFamilyDocument};
         if(FeatureOperations.Contains(op))return FeatureDispatch(ui,d,op,a);
         if(op=="get_project_info"){if(a["save_document"]?.GetValue<bool>()==true)throw new ArgumentException("Use save_project for writes");var r=Adapter("ProjectInfo",d,a);r["document_token"]=Token(d);return r;}
         if(op=="save_project"||op=="run_workflow"){
@@ -154,7 +154,7 @@ partial class Handler : IExternalEventHandler {
         if(actions.Count==0||actions.Count>250)throw new ArgumentException("Batch requires 1..250 actions");
         return Write(d,actions,Str(a,"strategy","atomic"));
     }
-    static JsonObject Save(Document d,JsonObject result){try{d.Save();result["saved"]=true;}catch(Exception e){result["success"]=false;result["saved"]=false;result["code"]="SAVE_FAILED";result["message"]=e.Message;result["changes_applied"]=(result["deleted"]?.GetValue<int>()??0)>0;}return result;}
+    static JsonObject Save(Document d,JsonObject result){try{d.Save();result["saved"]=true;}catch(Exception e){result["success"]=false;result["saved"]=false;result["code"]="SAVE_FAILED";result["message"]=e.Message;result["changes_applied"]=new[]{"created","modified","deleted"}.Sum(k=>result[k]?.GetValue<int>()??0)>0;}return result;}
     static JsonArray Ids(JsonObject a){var ids=a["ids"]?.AsArray()??throw new ArgumentException("ids required");if(ids.Count<1||ids.Count>250)throw new ArgumentException("ids requires 1..250 identifiers");return ids;}
     static void Expand(string op,JsonObject a,List<JsonObject> list) {
         if(op=="create_elements") {foreach(var s in a["spec"]?.AsArray()??throw new ArgumentException("spec array required"))list.Add(new JsonObject{["operation"]="create",["spec"]=s.DeepClone()});}

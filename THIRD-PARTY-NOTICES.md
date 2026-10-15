@@ -1,0 +1,24 @@
+# Third-party notices
+
+Dreamsign Revit MCP's own source is MIT licensed (Copyright 2026 Dreamsigner).
+Dependency licenses remain applicable to their respective components.
+
+- **ModelContextProtocol and ModelContextProtocol.Core 2.2.0**: Apache License 2.0;
+  copyright © Model Context Protocol a Series of LF Projects, LLC.
+  Source: https://github.com/modelcontextprotocol/csharp-sdk/tree/v2.2.0
+  License: `licenses/MCP-Apache-2.0.txt`.
+- **Microsoft.Extensions.*, System.Diagnostics.EventLog and .NET runtime**:
+  Microsoft and contributors; MIT license and the additional third-party notices
+  supplied with .NET. Copies: `licenses/DOTNET-LICENSE.txt` and
+  `licenses/DOTNET-ThirdPartyNotices.txt`.
+  Source: https://github.com/dotnet/runtime and https://github.com/dotnet/extensions
+
+Resolved package versions and integrity hashes are recorded in each project's
+`packages.lock.json`. The server's `Dreamsign.Revit.Mcp.deps.json` identifies the
+components used by a particular build. A self-contained build includes the .NET
+runtime; a framework-dependent build uses the locally installed runtime.
+
+Autodesk Revit and its SDK assemblies are proprietary products. They are not
+distributed in this repository or copied into the plugin package. A licensed
+local Revit 2027 installation is required. This is an independent project and
+does not imply endorsement by Autodesk or the MCP SDK maintainers.

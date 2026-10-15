@@ -5,202 +5,157 @@
 
 **Connectez un assistant IA à Revit pour explorer un modèle et automatiser des tâches BIM.**
 
-Dreamsign Revit MCP permet à un assistant compatible MCP de lire un projet Revit, créer des éléments et effectuer des modifications à partir de demandes en langage naturel. Il s’adresse aux architectes, aux équipes BIM et aux développeurs qui souhaitent automatiser des tâches répétitives dans **Revit 2027 sur Windows**.
+Dreamsign Revit MCP fournit 24 outils pour **Revit 2027 sur Windows** : consulter un projet, créer des éléments, préparer des modifications et vérifier leurs résultats. Il s’adresse aux architectes, équipes BIM et développeurs utilisant un assistant compatible MCP.
 
-Le MCP fournit les outils de connexion et d’action ; l’assistant IA interprète la demande et les utilise. Un client IA compatible est donc nécessaire : le plugin ne constitue pas, à lui seul, une interface de conversation.
+La version **0.4.0** utilise C#/.NET 10 et le SDK MCP officiel. Le serveur, le plugin, l’installation et les tests n’exigent ni Node.js ni scripts PowerShell. JSON reste un format de données.
+
+> Validation : compilation contre Revit 2027, 40 tests hors Revit et essais natifs de la version 0.4 dans un projet dédié sous Revit 2027.2. Les essais portent sur la connexion MCP, les niveaux, la prévisualisation, les captures et le nettoyage ; ils ne constituent pas une validation exhaustive de tous les objets BIM.
 
 ```mermaid
 flowchart LR
-    A[Votre demande] --> B[Assistant IA compatible MCP]
-    B <--> C[Dreamsign Revit MCP]
-    C <--> D[Projet ouvert dans Revit 2027]
+    A[Assistant compatible MCP] <-->|stdio| B[Serveur C#]
+    B <-->|Pipe local privé| C[Plugin C# Revit 2027]
+    C --> D[Projet explicitement ciblé]
 ```
 
-## À quoi sert-il ?
+## Fonctions
 
-| Besoin | Fonctions disponibles |
+| Besoin | Fonctions |
 |---|---|
-| Comprendre un modèle | Lire les niveaux, rechercher des éléments, inspecter leurs types et propriétés |
-| Créer des éléments | Murs, portes et fenêtres hébergées, pièces, étiquettes, quadrillages et composants |
-| Automatiser des modifications | Régler les allèges de fenêtres, attribuer des repères, étiqueter des pièces |
-| Contrôler une intervention | Prévisualiser des actions, comparer des états et vérifier les éléments modifiés |
-| Réduire les échanges avec l’IA | Exécuter des actions par lots et recevoir des résultats compacts |
+| Explorer | Niveaux, éléments, types, familles, propriétés et validation d’identifiants |
+| Créer | Murs, portes, fenêtres, pièces, étiquettes, quadrillages et composants ; types et hôtes requis |
+| Automatiser | Allèges, repères de portes/fenêtres, étiquettes de pièces et suppression de catégories d’étiquettes |
+| Préparer | Prévisualisation annulée, puis application d’un plan lié au document et à sa révision |
+| Comparer | Captures limitées et comparaison des pages capturées |
+| Limiter le contexte IA | Profils d’outils, lots, résultats compacts et rapports complets sur disque |
 
-Exemples de demandes à adresser à l’assistant :
+Exemples de demandes à l’assistant :
 
-> « Liste les niveaux et compte les fenêtres du RDC, sans modifier le modèle. »
+> « Liste les niveaux et compte les fenêtres du RDC sans modifier le modèle. »
 >
-> « Prépare le passage des allèges des fenêtres du RDC à 0,80 m. Montre les éléments concernés avant d’appliquer. »
+> « Prépare le passage des allèges de ces fenêtres à 0,80 m, puis applique le plan si les contrôles réussissent. »
 >
-> « Étiquette les pièces fermées qui ne sont pas encore étiquetées dans cette vue, avec le type déjà chargé. »
+> « Étiquette les pièces fermées de cette vue avec le type déjà chargé. »
 
-La création de géométrie exige des dimensions, des types et des hôtes identifiés. Une photo ou un croquis ne devient pas automatiquement un modèle fidèle : l’assistant doit en analyser les informations et faire clarifier les données manquantes.
+Le MCP fournit les actions ; le client IA interprète la demande. Il ne constitue pas une interface de conversation autonome. Une photo ou un croquis exige une analyse préalable : dimensions, types et hôtes doivent être identifiés avant création.
 
-## Compatibilité et prérequis
+## Prérequis
 
-| Composant | Requis |
+| Usage | Requis |
 |---|---|
-| Système | Windows |
-| Revit | Revit 2027 installé et licencié ; autres versions non validées |
-| Node.js | Version 22 ou supérieure, accessible avec `node` |
-| PowerShell | Version 7.6 utilisant .NET 10 ; Windows PowerShell 5.1 ne convient pas |
-| Assistant IA | Client acceptant un serveur MCP local sur stdio |
-| Git | Pour le téléchargement par commande ; une archive ZIP peut aussi être utilisée |
+| Distribution autonome | Windows x64, Revit 2027 licencié, client MCP local sur stdio |
+| Compilation des sources | Les mêmes prérequis, plus SDK .NET **10.0.402 ou supérieur compatible avec global.json** |
+| Autres versions de Revit | Non prises en charge |
 
-**Distribution actuelle : installation depuis les sources.** Il faut compiler le plugin sur un poste équipé de Revit. Aucun installateur prêt à l’emploi ni DLL Autodesk n’est fourni. Le serveur Node.js ne nécessite pas d’installation de paquets npm.
+Aucune DLL Autodesk n’est fournie. Le plugin utilise Revit installé sur le poste. Les instructions ci-dessous construisent la distribution depuis les sources ; elles ne supposent pas qu’une release GitHub existe déjà.
 
-## Démarrage rapide
+## Installation depuis les sources
 
-### 1. Télécharger le projet
+### 1. Télécharger et compiler
 
-Ouvrez **PowerShell 7.6**, puis choisissez un dossier stable et accessible en écriture :
+Téléchargez **Code → Download ZIP**, ou clonez ce dépôt. Dans un terminal ouvert dans le dossier extrait :
 
-```powershell
-git clone https://github.com/Dreamsigner/Dreamsign_Revit_MCP.git
-Set-Location Dreamsign_Revit_MCP
-node --version
-$PSVersionTable.PSVersion
+```text
+dotnet test tests/Dreamsign.Tests/Dreamsign.Tests.csproj -c Release
+dotnet build src/Dreamsign.Revit/Dreamsign.Revit.csproj -c Release
+dotnet publish src/Dreamsign.Server/Dreamsign.Server.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeRevitAddin=true -o artifacts/win-x64
 ```
 
-Sans Git, utilisez **Code → Download ZIP** sur GitHub, extrayez l’archive, puis ouvrez PowerShell 7.6 dans le dossier extrait.
+Pour un autre emplacement de Revit, ajoutez `-p:RevitDirectory="D:\Applications\Revit 2027"` à la compilation du plugin. `artifacts/win-x64` contient l’exécutable, les notices et le sous-dossier `addin`. Conservez l’ensemble dans un dossier stable.
 
-### 2. Compiler et installer le plugin Revit
+### 2. Enregistrer le plugin
 
-Dans le dossier téléchargé, exécutez les commandes dans cet ordre. En cas d’erreur, corrigez-la avant de poursuivre.
+Depuis le dossier de distribution :
 
-```powershell
-node generate-contract.mjs
-node test.mjs
-node features.test.mjs
-./build.ps1
-./install.ps1
-Copy-Item project-state.example.json project-state.json
+```text
+Dreamsign.Revit.Mcp.exe install
 ```
 
-Si Revit n’est pas installé à son emplacement standard, remplacez la commande de compilation par :
+Le programme copie ses deux DLL dans `%LOCALAPPDATA%\DreamsignRevitMCP\addin`, dans un dossier versionné, puis crée `%APPDATA%\Autodesk\Revit\Addins\2027\AstraRevitBridge.addin`. Il ne ferme ni ne redémarre Revit.
 
-```powershell
-./build.ps1 -RevitDirectory 'D:\Applications\Revit 2027'
+Une installation existante provoque un refus par défaut. Pour remplacer explicitement un ancien bridge reconnu, avec sauvegarde du manifeste :
+
+```text
+Dreamsign.Revit.Mcp.exe install --replace-existing
 ```
 
-L’installateur enregistre le plugin dans le dossier utilisateur des compléments Revit 2027. Enregistrez votre travail, puis redémarrez l’instance Revit qui utilisera le MCP. Ne déplacez pas ensuite le dossier du dépôt : le manifeste pointe vers les fichiers compilés qu’il contient.
+Enregistrez votre travail puis relancez l’instance qui utilisera le plugin. Les autres instances ouvertes conservent leur code chargé jusqu’à leur propre redémarrage. Ce manifeste utilisateur s’applique aux futurs lancements de Revit 2027 de ce compte.
 
-Dans le gestionnaire de compléments, le plugin porte actuellement le nom technique **Astra Revit Local Bridge**.
+### 3. Cibler un projet
 
-### 3. Choisir le projet à piloter
+Pour le premier essai, créez un projet architectural et enregistrez-le sous `AstraBridge-Test-Demo.rvt`. Gardez-le actif, puis configurez son titre et son chemin absolu :
 
-Pour le premier essai, créez manuellement dans Revit un projet vide depuis un gabarit architectural, puis enregistrez-le, par exemple sous `C:\Projects\AstraBridge-Test-Demo.rvt`.
-
-Ouvrez `project-state.json` dans un éditeur de texte et adaptez uniquement les valeurs de `target` à ce fichier :
-
-```json
-{
-  "pid": null,
-  "document": "AstraBridge-Test-Demo",
-  "path": "C:\\Projects\\AstraBridge-Test-Demo.rvt"
-}
+```text
+Dreamsign.Revit.Mcp.exe configure --document AstraBridge-Test-Demo --path "C:\Projects\AstraBridge-Test-Demo.rvt"
+Dreamsign.Revit.Mcp.exe doctor
 ```
 
-Ce bloc représente la valeur de `target`, pas le fichier entier : conservez les autres propriétés. `document` correspond au titre du document Revit, normalement sans `.rvt`. `path` est le chemin absolu du fichier enregistré. Gardez ce document actif dans Revit.
+Le ciblage compare **titre et chemin complet**. Plusieurs correspondances ou un autre document actif provoquent un refus. `--pid` est facultatif ; un ancien PID ne prouve jamais l’identité du document.
 
-Avec `pid: null`, le MCP recherche l’instance correspondant au titre **et** au chemin. Il refuse les correspondances ambiguës. Les chemins et identifiants stockés dans `project-state.json` sont locaux ; ce fichier est exclu de Git.
+État, correspondances d’éléments et rapports sont locaux dans `%LOCALAPPDATA%\DreamsignRevitMCP`. Pour séparer plusieurs projets, utilisez un `--data-dir` distinct dans **toutes** les commandes et dans le client. Un appel concurrent utilisant ce même dossier est refusé avant envoi à Revit.
 
-### 4. Connecter l’assistant IA
+### 4. Connecter le client IA
 
-**Codex :** ajoutez l’entrée suivante à `%USERPROFILE%\.codex\config.toml`. Adaptez les chemins aux emplacements réels de Node.js et du dépôt ; `Get-Command node` permet de retrouver le programme Node.js.
-
-```toml
-[mcp_servers.dreamsign_revit]
-command = 'C:\Program Files\nodejs\node.exe'
-args = ['C:\Tools\Dreamsign_Revit_MCP\server.mjs']
-
-[mcp_servers.dreamsign_revit.env]
-ASTRA_MCP_PROFILE = 'modeling'
-```
-
-**Autre client MCP :** ajoutez un serveur stdio avec ce même programme, les mêmes arguments et la variable `ASTRA_MCP_PROFILE=modeling`. La structure JSON couramment utilisée est :
+Exemple stdio générique à adapter au client :
 
 ```json
 {
   "mcpServers": {
     "dreamsign_revit": {
-      "command": "C:\\Program Files\\nodejs\\node.exe",
-      "args": ["C:\\Tools\\Dreamsign_Revit_MCP\\server.mjs"],
-      "env": {"ASTRA_MCP_PROFILE": "modeling"}
+      "command": "C:\\Tools\\DreamsignRevitMCP\\Dreamsign.Revit.Mcp.exe",
+      "args": ["serve", "--profile", "modeling", "--data-dir", "C:\\Projects\\Demo-MCP"]
     }
   }
 }
 ```
 
-Le fichier et le menu de configuration dépendent du client. Rechargez la connexion MCP, ou redémarrez le client, après l’ajout. Ne créez pas une seconde entrée si le même bridge est déjà connecté sous un autre nom.
+Avec cet exemple, configurez d’abord la cible avec le même `--data-dir C:\Projects\Demo-MCP`. Entrée équivalente pour Codex :
 
-### 5. Vérifier la connexion et essayer
-
-Dans la conversation de l’assistant, commencez par cette demande en lecture seule :
-
-```text
-Utilise dreamsign_revit. Appelle discover_instances puis get_active_document.
-Vérifie que le titre et le chemin correspondent au projet de test configuré.
-Liste ensuite ses niveaux avec get_levels. Ne modifie aucun élément.
+```toml
+[mcp_servers.dreamsign_revit]
+command = 'C:\Tools\DreamsignRevitMCP\Dreamsign.Revit.Mcp.exe'
+args = ['serve', '--profile', 'modeling', '--data-dir', 'C:\Projects\Demo-MCP']
 ```
 
-Le résultat doit identifier le projet attendu et fournir ses niveaux. `get_active_document` retourne aussi un `document_token`, utilisé par les outils d’écriture pour vérifier l’identité du document.
+Rechargez la connexion du client. Remplacez l’ancienne entrée Node.js du même bridge pour éviter un doublon. Commencez par demander la lecture du document actif et des niveaux.
 
-Lorsque cette lecture réussit, ce premier exercice peut être exécuté **dans le projet de test uniquement** :
+## Profils et opérations
+
+| Profil | Outils | Usage |
+|---|---:|---|
+| `inspection` | 12 | Lecture seule |
+| `workflow` | 18 | Défaut : lecture, procédures préparées et sauvegarde |
+| `modeling` | 20 | Création, modification et suppression |
+| `diagnostic` | 13 | Lecture et création explicite d’un projet de test depuis l’accueil |
+| `full` | 24 | Catalogue complet pour développement |
+
+`--profile` prend la priorité sur `ASTRA_MCP_PROFILE`. Consultez les définitions sans Revit avec `Dreamsign.Revit.Mcp.exe catalog --profile full`.
+
+- Les écritures exigent le `document_token` de `get_active_document`, y compris `run_workflow`.
+- `set_window_sills`, `assign_marks` et `tag_rooms` préparent un plan ; `apply_plan` l’exécute. Il expire après cinq minutes et devient invalide après changement du document, de sa révision ou de sa vue.
+- Les lots sont limités à 250 actions. Un plan consommé ne peut pas être rejoué.
+- Après délai dépassé ou réponse incomplète, relisez l’état réel avant une nouvelle écriture. Aucune action n’est relancée automatiquement.
+- Un diff de pages capturées ne prouve pas une création ou suppression dans l’ensemble du modèle.
+- Le serveur utilise stdio et un pipe Windows accessible à l’utilisateur courant, sans port HTTP public.
+
+Dimensions en mètres, surfaces en m². Les résultats compacts indiquent le rapport complet local. Les tailles JSON ne mesurent pas les tokens facturés ni le coût de l’IA.
+
+## Désinstallation et retour arrière
 
 ```text
-Vérifie à nouveau le document actif : il doit être AstraBridge-Test-Demo.
-Crée un niveau temporaire à 12,345 m, avec un nom et un source_id uniques.
-Relis-le pour vérifier son altitude. Supprime ensuite uniquement ce niveau
-à partir de son UniqueId, puis vérifie son absence. N’effectue aucune autre
-modification et ne sauvegarde pas le projet.
+Dreamsign.Revit.Mcp.exe uninstall
 ```
 
-Cet exercice crée puis supprime réellement un élément. Une réussite confirme une première chaîne lecture → écriture → vérification → nettoyage ; elle ne valide pas toutes les fonctions de modélisation.
+Le programme sauvegarde puis retire uniquement son manifeste reconnu. Projets, rapports et DLL versionnées sont conservés. Il refuse le manifeste d’un autre complément ou de l’ancien bridge 0.3. Pour revenir à l’installation précédente, restaurez le manifeste `.addin` sauvegardé dans `backups`, puis relancez l’instance concernée. Ne chargez pas deux manifestes du même bridge.
 
-## Choisir les outils accessibles
+## Développement et licence
 
-Le profil `modeling` utilisé ci-dessus permet les premières opérations de création. Changez `ASTRA_MCP_PROFILE` selon l’usage, puis rechargez la connexion :
+Quatre projets : **Contracts**, **Server**, **Revit**, **Tests**. Le catalogue embarqué est partagé entre serveur et plugin, sans génération JavaScript.
 
-| Profil | Usage |
-|---|---|
-| `inspection` | Lectures et captures d’état, sans outils de modification du modèle |
-| `workflow` — défaut si la variable est absente | Lectures, sauvegarde et procédures métier |
-| `modeling` | Lectures, création, modification, suppression et procédures métier |
-| `diagnostic` | Lectures et création d’un projet de test avec gabarit configuré |
-| `full` | Tous les outils, dont lots bruts et prévisualisation générique |
+- [Architecture, compilation et tests](docs/DEVELOPMENT.md)
+- [Décision et validation de migration](docs/CSHARP-MIGRATION.md)
+- [Notices des dépendances](THIRD-PARTY-NOTICES.md)
 
-Les outils absents d’un profil sont également refusés à l’appel. Le contrat détaillé des filtres, snapshots et plans est décrit dans [la référence des fonctions](FEATURES-0.3.md).
+Un test réel est fourni, désactivé par défaut et limité à `AstraBridge-Test-*`. Les tests hors Revit ne prouvent pas l’exécution de transactions dans l’application. Modèles privés, logs et résultats locaux sont exclus de Git.
 
-## Dépannage
-
-| Symptôme | Vérification ou action |
-|---|---|
-| `node` n’est pas reconnu | Installer Node.js ou corriger son `PATH`, puis rouvrir PowerShell |
-| La compilation échoue | Utiliser PowerShell 7.6/.NET 10, vérifier Revit 2027 et son chemin ; voir le [guide développeur](docs/DEVELOPMENT.md) |
-| Aucun add-in accessible / `BRIDGE_UNAVAILABLE` | Vérifier que compilation et installation ont réussi, puis redémarrer l’instance Revit concernée |
-| `TARGET_UNAVAILABLE` ou mauvais document | Vérifier le titre, le chemin enregistré, le document actif et `project-state.json` |
-| `AMBIGUOUS_TARGET` | Identifier les instances ayant ouvert le même projet avant de continuer ; ne pas fermer un travail non enregistré |
-| Un outil de création manque | Choisir `modeling` ou `full`, puis recharger le client MCP |
-| Plan ou snapshot périmé | Relire le modèle et préparer un nouveau plan ; les captures expirent après cinq minutes et sont invalidées par les changements pertinents |
-| Revit occupé / délai dépassé | Terminer les dialogues ou modes d’édition en cours, puis inspecter le modèle avant de réessayer une écriture |
-
-## État du projet et limites
-
-La version du bridge dont ce dépôt est issu a été testée dans **Revit 2027.2**. La distribution portable est compilée et ses tests hors Revit sont exécutés par GitHub Actions. Une validation complète de cette distribution dans Revit reste à effectuer ; un badge vert ne prouve pas la création correcte d’un modèle.
-
-Les opérations utilisent un pipe Windows réservé au compte courant. Les suppressions entraînant des dépendances supplémentaires sont refusées. Les lots sont limités à 250 actions et les résultats à 100 éléments par page. Les champs `_m` utilisent des mètres. Certaines représentations de mobilier sont simplifiées ; le plugin ne garantit ni conformité réglementaire ni qualité architecturale automatique.
-
-Les écritures peuvent modifier le projet ouvert. Commencez sur un fichier de test, vérifiez les résultats avant sauvegarde et, après un timeout, ne répétez pas une écriture sans lire son résultat dans Revit.
-
-## Documentation et contribution
-
-- [Référence des fonctions et profils](FEATURES-0.3.md)
-- [Architecture, compilation, tests avancés et désinstallation](docs/DEVELOPMENT.md)
-- [Signaler un problème ou proposer une amélioration](https://github.com/Dreamsigner/Dreamsign_Revit_MCP/issues)
-
-Pour signaler un problème, indiquez la version de Revit, le profil MCP, l’opération et le message d’erreur. Retirez les chemins personnels, données de projet et jetons des extraits partagés.
-
-## Licence
-
-Copyright © 2026 Dreamsigner. Distribué sous [licence MIT](LICENSE).
+Copyright © 2026 Dreamsigner. Code sous [licence MIT](LICENSE) ; dépendances sous leurs licences respectives. Projet indépendant sans affiliation à Autodesk.
