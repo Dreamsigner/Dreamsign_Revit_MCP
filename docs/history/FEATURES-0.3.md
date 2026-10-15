@@ -1,3 +1,5 @@
+> Archive historique de la version 0.3 : les noms de fichiers et validations ci-dessous concernent cette ancienne version, pas la distribution C# 0.4. Consulter le README et docs/DEVELOPMENT.md pour les instructions actuelles.
+
 # Version 0.3.0 — améliorations issues de la comparaison GitHub
 
 Le manifeste charge AstraRevitBridge.v5.dll. Le registre bin/command-registry.json est généré depuis les définitions du serveur à la compilation et vérifié au démarrage. Il doit rester à côté de la DLL. Les tests réels 0.3 sont dans live-features.test.mjs ; leur résultat reste distinct de la validation 0.2.

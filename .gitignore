@@ -20,3 +20,9 @@ live-final-state.json
 .env
 .env.*
 config.toml
+**/bin/
+**/obj/
+.local/
+artifacts/
+TestResults/
+graphify-out/

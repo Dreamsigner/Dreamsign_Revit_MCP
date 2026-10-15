@@ -1,0 +1,5273 @@
+[
+  {
+    "name": "diff_snapshots",
+    "description": "Compare two captured pages in the same scope; old revision may differ, newest must be live.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "before_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "after_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "before_id",
+        "after_id"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "capture_snapshot",
+    "description": "Capture a bounded live query page; expires or invalidates after model changes.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filter": {
+          "type": "object",
+          "properties": {
+            "category": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "level": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "source_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "types": {
+              "type": "boolean"
+            },
+            "count_only": {
+              "type": "boolean"
+            },
+            "detail": {
+              "type": "boolean"
+            },
+            "class": {
+              "enum": [
+                "ImportInstance",
+                "ViewPlan",
+                "Grid",
+                "FamilySymbol"
+              ]
+            },
+            "fields": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "id",
+                  "unique_id",
+                  "name",
+                  "category",
+                  "source_id",
+                  "elevation_m",
+                  "bounds_m",
+                  "point_m",
+                  "curve_m",
+                  "family",
+                  "placement",
+                  "type_id",
+                  "host_id",
+                  "parameters",
+                  "dimensions",
+                  "area_m2",
+                  "number",
+                  "bounded",
+                  "level_id",
+                  "facing_vector",
+                  "hand_vector"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 24
+            },
+            "view_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              ]
+            },
+            "active_view": {
+              "type": "boolean"
+            },
+            "selected_only": {
+              "type": "boolean"
+            },
+            "type_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              ]
+            },
+            "family": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "box_min_m": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": -10000,
+                "maximum": 10000
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "box_max_m": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": -10000,
+                "maximum": 10000
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "predicates": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "field": {
+                    "enum": [
+                      "height_m",
+                      "width_m",
+                      "sill_m",
+                      "area_m2"
+                    ]
+                  },
+                  "op": {
+                    "enum": [
+                      "gt",
+                      "gte",
+                      "lt",
+                      "lte",
+                      "eq"
+                    ]
+                  },
+                  "value": {
+                    "type": "number",
+                    "minimum": -10000,
+                    "maximum": 10000
+                  }
+                },
+                "required": [
+                  "field",
+                  "op",
+                  "value"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 8
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "filter"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "read_snapshot",
+    "description": "Read captured rows only while document, revision and scope remain valid.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "snapshot_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "snapshot_id"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "preview_batch",
+    "description": "Validate a batch in rolled-back transactions and return a document-bound plan.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "document_token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "const": "create"
+                  },
+                  "spec": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "furniture_solid"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "points_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "type": "number",
+                                "minimum": -10000,
+                                "maximum": 10000
+                              },
+                              "minItems": 3,
+                              "maxItems": 3
+                            },
+                            "minItems": 3,
+                            "maxItems": 100
+                          },
+                          "height_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "name",
+                          "points_m",
+                          "height_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "grid"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "start_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "end_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "view_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "name",
+                          "start_m",
+                          "end_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "component"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "type_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "level_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "point_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "rotation_deg": {
+                            "type": "number",
+                            "minimum": -360,
+                            "maximum": 360
+                          },
+                          "center_xy": {
+                            "type": "boolean"
+                          },
+                          "description": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "type_id",
+                          "level_id",
+                          "point_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "curtain_opening"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "host_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "level_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "type_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "door_type_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "point_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "width_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "height_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "mark": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "host_id",
+                          "level_id",
+                          "type_id",
+                          "point_m",
+                          "width_m",
+                          "height_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "level"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "elevation_m": {
+                            "type": "number",
+                            "minimum": -10000,
+                            "maximum": 10000
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "name",
+                          "elevation_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "wall_type"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "base_type_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "width_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "name",
+                          "base_type_id",
+                          "width_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "wall"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "type_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "level_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "top_level_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "start_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "end_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "height_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "type_id",
+                          "level_id",
+                          "start_m",
+                          "end_m",
+                          "height_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "family_type"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "base_type_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "width_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "height_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "width_parameter": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "height_parameter": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "dimensions": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 256
+                                },
+                                "value_m": {
+                                  "type": "number",
+                                  "minimum": 0,
+                                  "maximum": 100
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "value_m"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "minItems": 1,
+                            "maxItems": 12
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "name",
+                          "base_type_id"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "door"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "type_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "host_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "level_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "point_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "sill_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "unjoin_wall_ids": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 256
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 1
+                                }
+                              ]
+                            },
+                            "minItems": 1,
+                            "maxItems": 250
+                          },
+                          "hand_flipped": {
+                            "type": "boolean"
+                          },
+                          "facing_flipped": {
+                            "type": "boolean"
+                          },
+                          "facing_vector": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "hand_vector": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "mark": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "type_id",
+                          "host_id",
+                          "level_id",
+                          "point_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "window"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "type_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "host_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "level_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "point_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "sill_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "unjoin_wall_ids": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 256
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 1
+                                }
+                              ]
+                            },
+                            "minItems": 1,
+                            "maxItems": 250
+                          },
+                          "hand_flipped": {
+                            "type": "boolean"
+                          },
+                          "facing_flipped": {
+                            "type": "boolean"
+                          },
+                          "facing_vector": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "hand_vector": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "mark": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "type_id",
+                          "host_id",
+                          "level_id",
+                          "point_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "room"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "level_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "point_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "number": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "height_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "level_id",
+                          "point_m",
+                          "name",
+                          "number"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "room_tag"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "room_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "view_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "type_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "point_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "room_id",
+                          "view_id",
+                          "point_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "element_tag"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "element_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "view_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "type_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "point_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "element_id",
+                          "view_id",
+                          "type_id",
+                          "point_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "room_boundary"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "view_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "start_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "end_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "view_id",
+                          "start_m",
+                          "end_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "load_family"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "path": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 500
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "path"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "view_setup"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "view_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "normal_display": {
+                            "type": "boolean"
+                          },
+                          "hide_ids": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 256
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 1
+                                }
+                              ]
+                            },
+                            "minItems": 1,
+                            "maxItems": 250
+                          },
+                          "crop_min_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "crop_max_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "scale": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 1000
+                          },
+                          "cut_height_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "top_height_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "view_id"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "operation",
+                  "spec"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "const": "modify"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "changes": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      "elevation_m": {
+                        "type": "number",
+                        "minimum": -10000,
+                        "maximum": 10000
+                      },
+                      "sill_m": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 10
+                      },
+                      "mark": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": false,
+                    "minProperties": 1
+                  }
+                },
+                "required": [
+                  "operation",
+                  "id",
+                  "changes"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "const": "delete"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "operation",
+                  "id"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 250
+        },
+        "save": {
+          "type": "boolean"
+        },
+        "response_mode": {
+          "enum": [
+            "compact",
+            "full"
+          ]
+        }
+      },
+      "required": [
+        "document_token",
+        "actions"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "apply_plan",
+    "description": "Apply a fresh one-use plan atomically; verifies typed writes and optionally saves.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "document_token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "plan_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "response_mode": {
+          "enum": [
+            "compact",
+            "full"
+          ]
+        }
+      },
+      "required": [
+        "document_token",
+        "plan_id"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "set_window_sills",
+    "description": "Prepare a verified plan setting sill height on filtered windows. Apply with apply_plan.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "document_token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "filter": {
+          "type": "object",
+          "properties": {
+            "category": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "level": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "source_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "types": {
+              "type": "boolean"
+            },
+            "count_only": {
+              "type": "boolean"
+            },
+            "detail": {
+              "type": "boolean"
+            },
+            "class": {
+              "enum": [
+                "ImportInstance",
+                "ViewPlan",
+                "Grid",
+                "FamilySymbol"
+              ]
+            },
+            "fields": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "id",
+                  "unique_id",
+                  "name",
+                  "category",
+                  "source_id",
+                  "elevation_m",
+                  "bounds_m",
+                  "point_m",
+                  "curve_m",
+                  "family",
+                  "placement",
+                  "type_id",
+                  "host_id",
+                  "parameters",
+                  "dimensions",
+                  "area_m2",
+                  "number",
+                  "bounded",
+                  "level_id",
+                  "facing_vector",
+                  "hand_vector"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 24
+            },
+            "view_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              ]
+            },
+            "active_view": {
+              "type": "boolean"
+            },
+            "selected_only": {
+              "type": "boolean"
+            },
+            "type_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              ]
+            },
+            "family": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "box_min_m": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": -10000,
+                "maximum": 10000
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "box_max_m": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": -10000,
+                "maximum": 10000
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "predicates": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "field": {
+                    "enum": [
+                      "height_m",
+                      "width_m",
+                      "sill_m",
+                      "area_m2"
+                    ]
+                  },
+                  "op": {
+                    "enum": [
+                      "gt",
+                      "gte",
+                      "lt",
+                      "lte",
+                      "eq"
+                    ]
+                  },
+                  "value": {
+                    "type": "number",
+                    "minimum": -10000,
+                    "maximum": 10000
+                  }
+                },
+                "required": [
+                  "field",
+                  "op",
+                  "value"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 8
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "value_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "save": {
+          "type": "boolean"
+        },
+        "response_mode": {
+          "enum": [
+            "compact",
+            "full"
+          ]
+        }
+      },
+      "required": [
+        "document_token",
+        "filter",
+        "value_m"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "assign_marks",
+    "description": "Prepare deterministic marks on filtered doors/windows; existing marks preserved by default.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "document_token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "filter": {
+          "type": "object",
+          "properties": {
+            "category": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "level": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "source_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "types": {
+              "type": "boolean"
+            },
+            "count_only": {
+              "type": "boolean"
+            },
+            "detail": {
+              "type": "boolean"
+            },
+            "class": {
+              "enum": [
+                "ImportInstance",
+                "ViewPlan",
+                "Grid",
+                "FamilySymbol"
+              ]
+            },
+            "fields": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "id",
+                  "unique_id",
+                  "name",
+                  "category",
+                  "source_id",
+                  "elevation_m",
+                  "bounds_m",
+                  "point_m",
+                  "curve_m",
+                  "family",
+                  "placement",
+                  "type_id",
+                  "host_id",
+                  "parameters",
+                  "dimensions",
+                  "area_m2",
+                  "number",
+                  "bounded",
+                  "level_id",
+                  "facing_vector",
+                  "hand_vector"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 24
+            },
+            "view_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              ]
+            },
+            "active_view": {
+              "type": "boolean"
+            },
+            "selected_only": {
+              "type": "boolean"
+            },
+            "type_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              ]
+            },
+            "family": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "box_min_m": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": -10000,
+                "maximum": 10000
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "box_max_m": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": -10000,
+                "maximum": 10000
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "predicates": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "field": {
+                    "enum": [
+                      "height_m",
+                      "width_m",
+                      "sill_m",
+                      "area_m2"
+                    ]
+                  },
+                  "op": {
+                    "enum": [
+                      "gt",
+                      "gte",
+                      "lt",
+                      "lte",
+                      "eq"
+                    ]
+                  },
+                  "value": {
+                    "type": "number",
+                    "minimum": -10000,
+                    "maximum": 10000
+                  }
+                },
+                "required": [
+                  "field",
+                  "op",
+                  "value"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 8
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "category": {
+          "enum": [
+            "Doors",
+            "Windows"
+          ]
+        },
+        "prefix": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "start": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "overwrite": {
+          "type": "boolean"
+        },
+        "save": {
+          "type": "boolean"
+        },
+        "response_mode": {
+          "enum": [
+            "compact",
+            "full"
+          ]
+        }
+      },
+      "required": [
+        "document_token",
+        "filter",
+        "category",
+        "prefix"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "tag_rooms",
+    "description": "Prepare room tags on enclosed filtered rooms, skipping rooms already tagged in the view.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "document_token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "filter": {
+          "type": "object",
+          "properties": {
+            "category": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "level": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "source_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "types": {
+              "type": "boolean"
+            },
+            "count_only": {
+              "type": "boolean"
+            },
+            "detail": {
+              "type": "boolean"
+            },
+            "class": {
+              "enum": [
+                "ImportInstance",
+                "ViewPlan",
+                "Grid",
+                "FamilySymbol"
+              ]
+            },
+            "fields": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "id",
+                  "unique_id",
+                  "name",
+                  "category",
+                  "source_id",
+                  "elevation_m",
+                  "bounds_m",
+                  "point_m",
+                  "curve_m",
+                  "family",
+                  "placement",
+                  "type_id",
+                  "host_id",
+                  "parameters",
+                  "dimensions",
+                  "area_m2",
+                  "number",
+                  "bounded",
+                  "level_id",
+                  "facing_vector",
+                  "hand_vector"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 24
+            },
+            "view_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              ]
+            },
+            "active_view": {
+              "type": "boolean"
+            },
+            "selected_only": {
+              "type": "boolean"
+            },
+            "type_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              ]
+            },
+            "family": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "box_min_m": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": -10000,
+                "maximum": 10000
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "box_max_m": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": -10000,
+                "maximum": 10000
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "predicates": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "field": {
+                    "enum": [
+                      "height_m",
+                      "width_m",
+                      "sill_m",
+                      "area_m2"
+                    ]
+                  },
+                  "op": {
+                    "enum": [
+                      "gt",
+                      "gte",
+                      "lt",
+                      "lte",
+                      "eq"
+                    ]
+                  },
+                  "value": {
+                    "type": "number",
+                    "minimum": -10000,
+                    "maximum": 10000
+                  }
+                },
+                "required": [
+                  "field",
+                  "op",
+                  "value"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 8
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "view_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "type_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "save": {
+          "type": "boolean"
+        },
+        "response_mode": {
+          "enum": [
+            "compact",
+            "full"
+          ]
+        }
+      },
+      "required": [
+        "document_token",
+        "filter",
+        "view_id",
+        "type_id"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "create_test_project",
+    "description": "Create and activate a new project from the configured architectural template in the local test folder. Requires explicit PID at Revit home; never overwrites existing files.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "pid": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        }
+      },
+      "required": [
+        "pid",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "discover_instances",
+    "description": "Find the single open instance matching the configured project path; read only.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_project_state",
+    "description": "Compact local decisions, historical baseline and pending items; not a live model snapshot.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "save_project",
+    "description": "Save the verified project outside a transaction.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "document_token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "response_mode": {
+          "enum": [
+            "compact",
+            "full"
+          ]
+        }
+      },
+      "required": [
+        "document_token"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "run_workflow",
+    "description": "Remove tags in one allowed category, optional exact source_id, verify and save in one Revit call. Max 250; dependency deletion refused.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "workflow": {
+          "const": "remove_tags"
+        },
+        "category": {
+          "enum": [
+            "DoorTags",
+            "WindowTags",
+            "RoomTags"
+          ]
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "document_token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "save": {
+          "type": "boolean"
+        },
+        "response_mode": {
+          "enum": [
+            "compact",
+            "full"
+          ]
+        }
+      },
+      "required": [
+        "workflow",
+        "category",
+        "document_token"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "ping_revit",
+    "description": "Health and Revit version; no model changes.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_active_document",
+    "description": "Active document and session token required for writes.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_project_info",
+    "description": "Project information and active view; optional fixed-path PNG export. Saving uses save_project.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "export_view": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_levels",
+    "description": "Levels sorted by elevation, at most 100.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "query_elements",
+    "description": "Query filtered Revit elements; projection, view/selection, type/family, spatial box and dimensional predicates.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filter": {
+          "type": "object",
+          "properties": {
+            "category": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "level": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "source_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "types": {
+              "type": "boolean"
+            },
+            "count_only": {
+              "type": "boolean"
+            },
+            "detail": {
+              "type": "boolean"
+            },
+            "class": {
+              "enum": [
+                "ImportInstance",
+                "ViewPlan",
+                "Grid",
+                "FamilySymbol"
+              ]
+            },
+            "fields": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "id",
+                  "unique_id",
+                  "name",
+                  "category",
+                  "source_id",
+                  "elevation_m",
+                  "bounds_m",
+                  "point_m",
+                  "curve_m",
+                  "family",
+                  "placement",
+                  "type_id",
+                  "host_id",
+                  "parameters",
+                  "dimensions",
+                  "area_m2",
+                  "number",
+                  "bounded",
+                  "level_id",
+                  "facing_vector",
+                  "hand_vector"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 24
+            },
+            "view_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              ]
+            },
+            "active_view": {
+              "type": "boolean"
+            },
+            "selected_only": {
+              "type": "boolean"
+            },
+            "type_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              ]
+            },
+            "family": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "box_min_m": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": -10000,
+                "maximum": 10000
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "box_max_m": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": -10000,
+                "maximum": 10000
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "predicates": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "field": {
+                    "enum": [
+                      "height_m",
+                      "width_m",
+                      "sill_m",
+                      "area_m2"
+                    ]
+                  },
+                  "op": {
+                    "enum": [
+                      "gt",
+                      "gte",
+                      "lt",
+                      "lte",
+                      "eq"
+                    ]
+                  },
+                  "value": {
+                    "type": "number",
+                    "minimum": -10000,
+                    "maximum": 10000
+                  }
+                },
+                "required": [
+                  "field",
+                  "op",
+                  "value"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 8
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "filter"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "create_elements",
+    "description": "Batch levels, walls, hosted doors/windows, rooms and tags. Explicit types/hosts required. source_id stored in RVT prevents duplicates.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "document_token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "strategy": {
+          "enum": [
+            "atomic",
+            "independent"
+          ]
+        },
+        "response_mode": {
+          "enum": [
+            "compact",
+            "full"
+          ]
+        },
+        "spec": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "furniture_solid"
+                  },
+                  "source_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "points_m": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": -10000,
+                        "maximum": 10000
+                      },
+                      "minItems": 3,
+                      "maxItems": 3
+                    },
+                    "minItems": 3,
+                    "maxItems": 100
+                  },
+                  "height_m": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source_id",
+                  "name",
+                  "points_m",
+                  "height_m"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "grid"
+                  },
+                  "source_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "start_m": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -10000,
+                      "maximum": 10000
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "end_m": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -10000,
+                      "maximum": 10000
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "view_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source_id",
+                  "name",
+                  "start_m",
+                  "end_m"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "component"
+                  },
+                  "source_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "type_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "level_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "point_m": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -10000,
+                      "maximum": 10000
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "rotation_deg": {
+                    "type": "number",
+                    "minimum": -360,
+                    "maximum": 360
+                  },
+                  "center_xy": {
+                    "type": "boolean"
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source_id",
+                  "type_id",
+                  "level_id",
+                  "point_m"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "curtain_opening"
+                  },
+                  "source_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "host_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "level_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "type_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "door_type_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "point_m": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -10000,
+                      "maximum": 10000
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "width_m": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "height_m": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "mark": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source_id",
+                  "host_id",
+                  "level_id",
+                  "type_id",
+                  "point_m",
+                  "width_m",
+                  "height_m"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "level"
+                  },
+                  "source_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "elevation_m": {
+                    "type": "number",
+                    "minimum": -10000,
+                    "maximum": 10000
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source_id",
+                  "name",
+                  "elevation_m"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "wall_type"
+                  },
+                  "source_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "base_type_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "width_m": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source_id",
+                  "name",
+                  "base_type_id",
+                  "width_m"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "wall"
+                  },
+                  "source_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "type_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "level_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "top_level_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "start_m": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -10000,
+                      "maximum": 10000
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "end_m": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -10000,
+                      "maximum": 10000
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "height_m": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source_id",
+                  "type_id",
+                  "level_id",
+                  "start_m",
+                  "end_m",
+                  "height_m"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "family_type"
+                  },
+                  "source_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "base_type_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "width_m": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "height_m": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "width_parameter": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "height_parameter": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "dimensions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        },
+                        "value_m": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 100
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "value_m"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1,
+                    "maxItems": 12
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source_id",
+                  "name",
+                  "base_type_id"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "door"
+                  },
+                  "source_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "type_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "host_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "level_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "point_m": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -10000,
+                      "maximum": 10000
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "sill_m": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "unjoin_wall_ids": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        },
+                        {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      ]
+                    },
+                    "minItems": 1,
+                    "maxItems": 250
+                  },
+                  "hand_flipped": {
+                    "type": "boolean"
+                  },
+                  "facing_flipped": {
+                    "type": "boolean"
+                  },
+                  "facing_vector": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -10000,
+                      "maximum": 10000
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "hand_vector": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -10000,
+                      "maximum": 10000
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "mark": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source_id",
+                  "type_id",
+                  "host_id",
+                  "level_id",
+                  "point_m"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "window"
+                  },
+                  "source_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "type_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "host_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "level_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "point_m": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -10000,
+                      "maximum": 10000
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "sill_m": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "unjoin_wall_ids": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        },
+                        {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      ]
+                    },
+                    "minItems": 1,
+                    "maxItems": 250
+                  },
+                  "hand_flipped": {
+                    "type": "boolean"
+                  },
+                  "facing_flipped": {
+                    "type": "boolean"
+                  },
+                  "facing_vector": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -10000,
+                      "maximum": 10000
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "hand_vector": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -10000,
+                      "maximum": 10000
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "mark": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source_id",
+                  "type_id",
+                  "host_id",
+                  "level_id",
+                  "point_m"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "room"
+                  },
+                  "source_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "level_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "point_m": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -10000,
+                      "maximum": 10000
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "number": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "height_m": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source_id",
+                  "level_id",
+                  "point_m",
+                  "name",
+                  "number"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "room_tag"
+                  },
+                  "source_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "room_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "view_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "type_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "point_m": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -10000,
+                      "maximum": 10000
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source_id",
+                  "room_id",
+                  "view_id",
+                  "point_m"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "element_tag"
+                  },
+                  "source_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "element_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "view_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "type_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "point_m": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -10000,
+                      "maximum": 10000
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source_id",
+                  "element_id",
+                  "view_id",
+                  "type_id",
+                  "point_m"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "room_boundary"
+                  },
+                  "source_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "view_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "start_m": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -10000,
+                      "maximum": 10000
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "end_m": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -10000,
+                      "maximum": 10000
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source_id",
+                  "view_id",
+                  "start_m",
+                  "end_m"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "load_family"
+                  },
+                  "source_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source_id",
+                  "path"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "view_setup"
+                  },
+                  "source_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "view_id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "normal_display": {
+                    "type": "boolean"
+                  },
+                  "hide_ids": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        },
+                        {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      ]
+                    },
+                    "minItems": 1,
+                    "maxItems": 250
+                  },
+                  "crop_min_m": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -10000,
+                      "maximum": 10000
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "crop_max_m": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -10000,
+                      "maximum": 10000
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "scale": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000
+                  },
+                  "cut_height_m": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "top_height_m": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source_id",
+                  "view_id"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 250
+        }
+      },
+      "required": [
+        "document_token",
+        "spec"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "modify_elements",
+    "description": "Modify name or level elevation_m. Stable UniqueId preferred.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "document_token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "strategy": {
+          "enum": [
+            "atomic",
+            "independent"
+          ]
+        },
+        "response_mode": {
+          "enum": [
+            "compact",
+            "full"
+          ]
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 250
+        },
+        "changes": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "elevation_m": {
+              "type": "number",
+              "minimum": -10000,
+              "maximum": 10000
+            },
+            "sill_m": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "mark": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          },
+          "required": [],
+          "additionalProperties": false,
+          "minProperties": 1
+        }
+      },
+      "required": [
+        "document_token",
+        "ids",
+        "changes"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "delete_elements",
+    "description": "Delete explicit IDs; deletion of dependent elements is refused and rolled back.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "document_token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "strategy": {
+          "enum": [
+            "atomic",
+            "independent"
+          ]
+        },
+        "response_mode": {
+          "enum": [
+            "compact",
+            "full"
+          ]
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 250
+        }
+      },
+      "required": [
+        "document_token",
+        "ids"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "execute_batch",
+    "description": "One Revit round trip for max 250 create/modify/delete actions. Atomic default; independent commits valid actions.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "document_token": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "strategy": {
+          "enum": [
+            "atomic",
+            "independent"
+          ]
+        },
+        "response_mode": {
+          "enum": [
+            "compact",
+            "full"
+          ]
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "const": "create"
+                  },
+                  "spec": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "furniture_solid"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "points_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "type": "number",
+                                "minimum": -10000,
+                                "maximum": 10000
+                              },
+                              "minItems": 3,
+                              "maxItems": 3
+                            },
+                            "minItems": 3,
+                            "maxItems": 100
+                          },
+                          "height_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "name",
+                          "points_m",
+                          "height_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "grid"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "start_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "end_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "view_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "name",
+                          "start_m",
+                          "end_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "component"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "type_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "level_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "point_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "rotation_deg": {
+                            "type": "number",
+                            "minimum": -360,
+                            "maximum": 360
+                          },
+                          "center_xy": {
+                            "type": "boolean"
+                          },
+                          "description": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "type_id",
+                          "level_id",
+                          "point_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "curtain_opening"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "host_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "level_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "type_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "door_type_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "point_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "width_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "height_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "mark": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "host_id",
+                          "level_id",
+                          "type_id",
+                          "point_m",
+                          "width_m",
+                          "height_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "level"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "elevation_m": {
+                            "type": "number",
+                            "minimum": -10000,
+                            "maximum": 10000
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "name",
+                          "elevation_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "wall_type"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "base_type_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "width_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "name",
+                          "base_type_id",
+                          "width_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "wall"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "type_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "level_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "top_level_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "start_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "end_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "height_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "type_id",
+                          "level_id",
+                          "start_m",
+                          "end_m",
+                          "height_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "family_type"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "base_type_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "width_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "height_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "width_parameter": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "height_parameter": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "dimensions": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 256
+                                },
+                                "value_m": {
+                                  "type": "number",
+                                  "minimum": 0,
+                                  "maximum": 100
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "value_m"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "minItems": 1,
+                            "maxItems": 12
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "name",
+                          "base_type_id"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "door"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "type_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "host_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "level_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "point_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "sill_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "unjoin_wall_ids": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 256
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 1
+                                }
+                              ]
+                            },
+                            "minItems": 1,
+                            "maxItems": 250
+                          },
+                          "hand_flipped": {
+                            "type": "boolean"
+                          },
+                          "facing_flipped": {
+                            "type": "boolean"
+                          },
+                          "facing_vector": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "hand_vector": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "mark": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "type_id",
+                          "host_id",
+                          "level_id",
+                          "point_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "window"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "type_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "host_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "level_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "point_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "sill_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "unjoin_wall_ids": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 256
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 1
+                                }
+                              ]
+                            },
+                            "minItems": 1,
+                            "maxItems": 250
+                          },
+                          "hand_flipped": {
+                            "type": "boolean"
+                          },
+                          "facing_flipped": {
+                            "type": "boolean"
+                          },
+                          "facing_vector": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "hand_vector": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "mark": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "type_id",
+                          "host_id",
+                          "level_id",
+                          "point_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "room"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "level_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "point_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "number": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "height_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "level_id",
+                          "point_m",
+                          "name",
+                          "number"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "room_tag"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "room_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "view_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "type_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "point_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "room_id",
+                          "view_id",
+                          "point_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "element_tag"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "element_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "view_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "type_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "point_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "element_id",
+                          "view_id",
+                          "type_id",
+                          "point_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "room_boundary"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "view_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "start_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "end_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "view_id",
+                          "start_m",
+                          "end_m"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "load_family"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "path": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 500
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "path"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "view_setup"
+                          },
+                          "source_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "view_id": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 256
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 1
+                              }
+                            ]
+                          },
+                          "normal_display": {
+                            "type": "boolean"
+                          },
+                          "hide_ids": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 256
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 1
+                                }
+                              ]
+                            },
+                            "minItems": 1,
+                            "maxItems": 250
+                          },
+                          "crop_min_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "crop_max_m": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -10000,
+                              "maximum": 10000
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "scale": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 1000
+                          },
+                          "cut_height_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "top_height_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "source_id",
+                          "view_id"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "operation",
+                  "spec"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "const": "modify"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  },
+                  "changes": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      "elevation_m": {
+                        "type": "number",
+                        "minimum": -10000,
+                        "maximum": 10000
+                      },
+                      "sill_m": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 10
+                      },
+                      "mark": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": false,
+                    "minProperties": 1
+                  }
+                },
+                "required": [
+                  "operation",
+                  "id",
+                  "changes"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "const": "delete"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "operation",
+                  "id"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 250
+        }
+      },
+      "required": [
+        "document_token",
+        "actions"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "validate_elements",
+    "description": "Check existence and compact identity/elevation for max 250 IDs.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "ids": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 250
+        }
+      },
+      "required": [
+        "ids"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "get_last_errors",
+    "description": "Last 20 compact errors; current add-in session only.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false
+    }
+  }
+]

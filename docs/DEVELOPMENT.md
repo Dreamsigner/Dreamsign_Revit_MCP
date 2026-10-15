@@ -1,117 +1,71 @@
-# Guide développeur
+# Développement — C# / Revit 2027
 
-Pour l’installation et le premier essai, commencer par le [README](../README.md). Cette page décrit l’architecture, la compilation, les ressources optionnelles et les tests avancés. Les commandes ci-dessous s’exécutent depuis la racine du dépôt.
+## Architecture
 
-Architecture : client MCP → serveur Node.js sur stdio → pipe Windows `AstraRevitBridge-2027-{PID}` → add-in C# → `ExternalEvent` → API Revit. Le serveur n’a pas de dépendances npm.
-
-Le cœur est en version **0.3.0 / v5**. Le transport conserve le nom `AstraRevitBridge` pour rester compatible avec l’add-in initial.
-
-## Fonctions
-
-- Inspection des niveaux, types, éléments, vues, sélection et propriétés géométriques.
-- Création de murs, portes et fenêtres hébergées, pièces, étiquettes, quadrillages et composants ; types et hôtes explicitement fournis.
-- Filtres par catégorie, niveau, famille/type, boîte spatiale et valeurs dimensionnelles.
-- Lots atomiques ou indépendants, identités `source_id` persistées dans le RVT et identifiants `UniqueId`.
-- Snapshots bornés, comparaison de pages et invalidation après modification du document.
-- Prévisualisation annulée, plans à usage unique et procédures d’allèges, repères et étiquettes de pièces.
-- Rapports détaillés locaux et réponses compactes au client MCP.
-
-## Prérequis
-
-- Revit 2027 installé et licencié. Les autres versions ne sont pas validées.
-- Node.js 22 ou supérieur dans le `PATH`.
-- PowerShell 7.6 avec ses assemblies Roslyn et le runtime .NET 10. La compilation utilise les DLL Revit installées ; aucune DLL Autodesk n’est distribuée.
-- Un client MCP acceptant un serveur stdio.
-
-## Installation
-
-Conserver le dépôt dans un dossier stable et accessible en écriture. Depuis PowerShell 7.6, dans ce dossier :
-
-```powershell
-node generate-contract.mjs
-node test.mjs
-node features.test.mjs
-./build.ps1
-./install.ps1
-Copy-Item project-state.example.json project-state.json
+```text
+Dreamsign.Contracts (net10.0)
+  ├─ Dreamsign.Server (net10.0, SDK MCP 2.2.0)
+  └─ Dreamsign.Revit (net10.0-windows, API Revit 2027 locale)
+Dreamsign.Tests → Server → Contracts
 ```
 
-Si Revit est installé ailleurs : `./build.ps1 -RevitDirectory 'D:\Applications\Revit 2027'`.
+`tool-catalog.json` est une ressource embarquée de Contracts : noms, descriptions, schémas et annotations. `ToolCatalog` définit les profils. Serveur et plugin lisent cette même ressource ; une modification du contrat exige des tests et leur recompilation.
 
-L’installateur écrit seulement son manifeste dans le dossier utilisateur Revit 2027. Il refuse de remplacer un manifeste d’identité différente. Il ne ferme aucune application. Si un autre exemplaire de ce bridge est déjà installé, vérifier le chemin du manifeste avant d’installer cette copie.
+Le serveur expose stdio via le SDK MCP officiel. `BridgeRuntime` valide avant accès au pipe, résout la cible par titre et chemin, sérialise les appels et conserve les rapports avant de compacter les résultats. Un verrou de fichier exclut les processus concurrents utilisant le même dossier d’état. Une erreur d’enregistrement après envoi retourne le résultat connu, sans nouvel envoi.
 
-Enregistrer le travail et redémarrer **uniquement l’instance Revit concernée** pour charger le nouvel add-in. Le code chargé dans une instance existante n’est pas remplacé par la simple compilation.
+Le plugin utilise `ExternalEvent` pour accéder à l’API Revit sur le thread autorisé. Transactions, contrôles de jeton et vérifications sont conservés. L’adaptateur BIM est lié dans la même DLL ; chargement par réflexion et registre généré séparément sont supprimés. Les noms internes `AstraRevitBridge`, l’identifiant du complément et celui des identités source sont conservés pour la transition.
 
-## Choisir le document cible
+## Compiler et tester
 
-Éditer `project-state.json` : renseigner le titre exact du document Revit et le chemin absolu du RVT. `pid: null` active la découverte parmi les pipes du bridge ; un PID peut servir d’indication. Un titre identique avec un chemin différent est refusé ; plusieurs correspondances sont également refusées. Le document cible doit être actif dans l’instance.
+SDK .NET 10.0.402 ou version acceptée par `global.json` :
 
-Ne pas publier ce fichier : il contient l’état du projet et peut contenir des chemins et identifiants privés.
-
-## Connecter un client MCP
-
-Exemple de configuration Codex, avec des chemins à adapter :
-
-```toml
-[mcp_servers.dreamsign_revit]
-command = 'C:\Program Files\nodejs\node.exe'
-args = ['C:\Tools\Dreamsign_Revit_MCP\server.mjs']
-
-[mcp_servers.dreamsign_revit.env]
-ASTRA_MCP_PROFILE = 'modeling'
+```text
+dotnet restore tests/Dreamsign.Tests/Dreamsign.Tests.csproj --locked-mode
+dotnet test tests/Dreamsign.Tests/Dreamsign.Tests.csproj -c Release --no-restore
+dotnet build Dreamsign.Revit.MCP.sln -c Release
 ```
 
-Pour d’autres clients, utiliser le même programme et les mêmes arguments dans leur configuration stdio. Recharger la connexion après configuration ou mise à jour du catalogue.
+Seule la solution complète exige Revit 2027. Les tests hors Revit et le serveur n’exigent aucune DLL Autodesk. Les références du plugin sont `Private=false` et `ExternallyResolved=true` : Revit fournit ses dépendances à l’exécution ; MSBuild ne copie pas son environnement applicatif dans le paquet.
 
-| Profil | Usage |
+Les `packages.lock.json` fixent versions et empreintes. Une mise à jour intentionnelle restaure sans `--locked-mode`, examine les changements puis relance les tests.
+
+Les tests couvrent contrats, profils, refus d’arguments, ciblage, résumés d’erreurs, état local, installation, limites de pipe, identité des réponses, délais et échange stdio avec le client MCP officiel. Les pipes simulés emploient des identifiants hors plage des PID Windows pour ne pas contacter Revit.
+
+## Test réel volontaire
+
+Le test crée un niveau temporaire, prévisualise puis applique une modification, vérifie l’invalidation d’une capture et le refus de rejouer le plan, compare les captures puis supprime son niveau. Il ne sauvegarde pas automatiquement. Une erreur de transport peut nécessiter une vérification manuelle des éléments préfixés `migration-test-`.
+
+Préparez un projet dédié **AstraBridge-Test-*** enregistré et actif dans Revit 2027 avec le plugin **0.4** chargé. Configurez-le dans un dossier d’état réservé. Définissez dans l’environnement du terminal :
+
+| Variable | Valeur |
 |---|---|
-| `inspection` | Lectures et snapshots |
-| `workflow` (défaut) | Lectures, sauvegarde et procédures métier |
-| `modeling` | Lectures et création/modification/suppression |
-| `diagnostic` | Lectures et création d’un projet de test |
-| `full` | Tous les outils, dont lots bruts et prévisualisation générique |
+| `DREAMSIGN_RUN_REVIT_TESTS` | `1` |
+| `DREAMSIGN_REVIT_TEST_DATA_DIR` | Chemin absolu du dossier d’état configuré pour ce test |
 
-Commencer par `discover_instances`, `get_active_document`, puis une lecture bornée. Les écritures utilisent le `document_token` retourné pour le document ouvert.
+```text
+dotnet test tests/Dreamsign.Tests/Dreamsign.Tests.csproj -c Release --filter FullyQualifiedName~LiveRevitTests
+```
 
-## Ressources locales optionnelles
+L’activation ne crée ni ne ferme d’instance. Le titre, le chemin et la version restent contrôlés. `create_test_project` (diagnostic/full) exige un PID explicite, une instance à l’accueil sans document actif et `ASTRA_REVIT_TEST_TEMPLATE` pointant vers un `.rte` existant dans l’environnement de cette instance. Aucun fichier existant n’est écrasé.
 
-Les variables suivantes sont lues **dans le processus Revit** : les définir avant de démarrer Revit, pas uniquement dans le client MCP.
+## Distribution
 
-- `ASTRA_REVIT_TEST_TEMPLATE` : chemin d’un gabarit architectural `.rte`, requis pour `create_test_project`.
-- `ASTRA_REVIT_FAMILY_ROOT` : racine autorisée pour `load_family`. Valeur par défaut : bibliothèque française standard de Revit 2027 sous `%PROGRAMDATA%`.
+Compilez le plugin en Release puis publiez :
 
-Les projets de test sont créés dans `%LOCALAPPDATA%\DreamsignRevitMCP\test-projects`, uniquement depuis l’accueil sans document actif et sans écraser un fichier. Les exports de vues vont dans `%LOCALAPPDATA%\DreamsignRevitMCP\exports`.
+```text
+dotnet publish src/Dreamsign.Server/Dreamsign.Server.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeRevitAddin=true -o artifacts/win-x64
+```
 
-## Validation
+L’exécutable intègre serveur et runtime .NET. Les deux DLL du plugin restent dans `addin` car elles doivent être chargées dans Revit, séparément du processus MCP. L’installateur copie uniquement ces DLL dans un dossier versionné, sauvegarde le manifeste remplacé et écrit le nouveau manifeste atomiquement. Il ne modifie pas les clients MCP.
 
-`node test.mjs` et `node features.test.mjs` sont hors Revit et ne modifient aucun modèle. La CI exécute ces tests et génère le registre de commandes.
+La CI Windows restaure les dépendances verrouillées, teste hors Revit et publie le **serveur seulement**. Elle ne valide pas le plugin dans Revit ; une distribution complète exige sa compilation locale.
 
-`node live-features.test.mjs` est un **test avec écritures réelles** réservé à un nouveau projet `AstraBridge-Test-*` autorisé, issu d’un gabarit architectural contenant les types requis. Il crée des éléments temporaires, applique des modifications, les nettoie et sauvegarde. Consulter son résultat avant toute relance après erreur.
+## Données et compatibilité
 
-Le bridge local d’origine a été testé dans Revit 2027.2. La copie portable publiée est compilée et testée hors Revit ; ces contrôles ne constituent pas une nouvelle validation de modélisation dans Revit.
+Le serveur 0.4 accepte le bridge 0.3 pendant la transition. Le nouveau plugin valide aussi les schémas reçus : l’ancien serveur avec le nouveau plugin n’est pas garanti. Mettre à jour les deux pour une installation normale.
 
-## Limites et sécurité
+`configure` sauvegarde l’état quand le modèle change et réinitialise ses correspondances. Un changement de PID les conserve. L’ancien `project-state.json` peut être utilisé avec `--data-dir` pointant sur son dossier, après sauvegarde et vérification de sa cible. Aucun chemin de modèle n’est compilé dans le programme.
 
-- Pipe Windows réservé au compte courant, aucune écoute HTTP et aucun exécuteur de code arbitraire.
-- Maximum 250 actions par lot et 100 éléments par page. Unités métriques explicites dans les champs `_m`.
-- Une suppression qui entraînerait des dépendances supplémentaires est annulée.
-- Les erreurs et avertissements Revit font annuler l’action concernée. Les garanties de transaction ne couvrent pas les sorties de fichiers ni une sauvegarde échouée.
-- Après timeout, le résultat peut être inconnu : lire le modèle avant de réessayer une écriture.
-- Snapshots et plans expirent après cinq minutes. Les différences concernent les pages capturées, pas nécessairement tout le projet.
-- Les descriptions simplifiées de mobilier ne remplacent pas des familles BIM détaillées.
-- Les journaux, rapports, modèles, sauvegardes, exports et configurations privées sont exclus du dépôt.
+Le pipe conserve le préfixe `AstraRevitBridge-2027-`, les identifiants de requêtes et les limites 256 KiB / 1 MiB. Après `SAVE_FAILED`, `changes_applied` indique les modifications en mémoire lorsque leur décompte est connu ; il ne signifie pas qu’elles sont enregistrées sur disque.
 
-Le module BIM se recompile avec `./build.ps1 -AdapterOnly`. Le remplacement du cœur chargé exige un redémarrage de l’instance Revit concernée. Les détails des fonctions sont dans [FEATURES-0.3.md](../FEATURES-0.3.md).
-
-## Désinstallation
-
-1. Enregistrer le travail et fermer l’instance Revit concernée.
-2. Retirer uniquement `%APPDATA%\Autodesk\Revit\Addins\2027\AstraRevitBridge.addin`, après vérification qu’il pointe vers cette installation.
-3. Retirer l’entrée `dreamsign_revit` et son bloc d’environnement de la configuration du client MCP, puis recharger la connexion.
-4. Archiver les rapports et configurations à conserver avant de supprimer le dossier de cette installation.
-
-Les modèles RVT et les autres add-ins ne doivent pas être supprimés. Retirer le bridge n’annule pas les modifications déjà enregistrées dans un modèle.
-
-## Licence
-
-Copyright © 2026 Dreamsigner. Distribué sous [licence MIT](../LICENSE).
+Paramètres du plugin conservés : `ASTRA_REVIT_FAMILY_ROOT`, `ASTRA_REVIT_TEST_TEMPLATE`. Paramètre serveur conservé : `ASTRA_MCP_PROFILE` ; ajout de `DREAMSIGN_MCP_DATA_DIR`. Exports, rapports et journaux restent locaux et exclus de Git.
