@@ -26,6 +26,7 @@ public partial class ControlPanelWindow : Window
         BridgeStatus.Text = "Bridge chargé";
         VersionText.Text = "Dreamsign MCP · " + ToolCatalog.Version;
         ActiveProjectText.Text = state.ActiveProject;
+        ActiveProjectText.ToolTip = state.ActiveProject;
         ActivePathText.Text = state.ActivePath; ActivePathText.ToolTip = state.ActivePath;
         UseProjectButton.IsEnabled = state.CanSelect;
         UseProjectButton.ToolTip = state.CanSelect ? "Autoriser le MCP à utiliser ce projet." : "Ouvrez un projet et enregistrez-le au format RVT.";
@@ -38,7 +39,7 @@ public partial class ControlPanelWindow : Window
             : !state.IsTarget ? "Choisissez d’abord le projet de travail." : "Sauvegarder et configurer cet assistant.";
         System.Windows.Controls.ToolTipService.SetShowOnDisabled(ConnectButton, true);
         ContactText.Text = "Dernier contact : " + state.LastContact;
-        StorageText.Text = "Dossier de configuration : " + state.DataDirectory;
+        StorageText.Text = "Données de cet utilisateur : " + state.DataDirectory;
     }
     private void Run(Action action)
     {

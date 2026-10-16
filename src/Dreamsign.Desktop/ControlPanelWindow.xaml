@@ -70,7 +70,7 @@
       <TextBlock Text="Vos réglages sont sauvegardés avant chaque changement." Style="{StaticResource SecondaryText}" Margin="0,12,0,0"/>
      </StackPanel>
     </Border>
-    <Expander Header="Configuration avancée" Margin="4,20,0,0" Foreground="{StaticResource MutedInk}" FontSize="12">
+    <Expander x:Name="AdvancedSettings" Header="Configuration avancée" Margin="4,20,0,0" Foreground="{StaticResource MutedInk}" FontSize="12">
      <StackPanel Margin="0,12,0,0"><TextBlock x:Name="StorageText" Style="{StaticResource SecondaryText}"/>
       <Button Content="Copier la configuration pour un autre client" Click="CopyConfiguration" HorizontalAlignment="Left" Margin="0,12,0,0"/>
      </StackPanel>

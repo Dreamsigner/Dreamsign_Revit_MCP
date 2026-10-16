@@ -68,7 +68,13 @@ public sealed class DesktopTests
                     Assert.True(button.IsEnabled); button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                     Assert.True(selected);
                     Assert.Contains("Ce projet est la cible",((TextBlock)window.FindName("TargetText")).Text);
-                    ((ComboBox)window.FindName("ClientChoice")).SelectedIndex=2;
+                    var choice = (ComboBox)window.FindName("ClientChoice");
+                    choice.SelectedIndex = 2; choice.IsDropDownOpen = true; window.UpdateLayout();
+                    var popup = (System.Windows.Controls.Primitives.Popup)choice.Template.FindName("PART_Popup", choice);
+                    Assert.True(popup.IsOpen);
+                    Assert.True(popup.Child.RenderSize.Width >= choice.ActualWidth);
+                    if (preview is not null) Capture(window, Path.ChangeExtension(preview, ".dropdown.png"), (FrameworkElement)popup.Child);
+                    choice.IsDropDownOpen = false;
                     var connect=FindButton(window,"Configurer la connexion");
                     Assert.True(connect.IsEnabled);
                     connect.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); Assert.True(connected);
@@ -78,6 +84,8 @@ public sealed class DesktopTests
                         window.Width = 600; window.Height = 600; window.UpdateLayout();
                         Assert.True(FindButton(window, "Terminer").IsVisible);
                         Capture(window, Path.ChangeExtension(preview, ".compact.png"));
+                        ((Expander)window.FindName("AdvancedSettings")).IsExpanded = true; window.UpdateLayout();
+                        Assert.True(FindButton(window, "Copier la configuration pour un autre client").IsVisible);
                     }
                 }
                 finally { window.Close(); window.Dispatcher.InvokeShutdown(); }
@@ -98,9 +106,9 @@ public sealed class DesktopTests
         }
         throw new InvalidOperationException("Button not found");
     }
-    private static void Capture(Window window, string path)
+    private static void Capture(Window window, string path, FrameworkElement? element = null)
     {
-        var content = (FrameworkElement)window.Content;
+        var content = element ?? (FrameworkElement)window.Content;
         content.UpdateLayout();
         var bitmap = new RenderTargetBitmap((int)content.ActualWidth, (int)content.ActualHeight, 96, 96, PixelFormats.Pbgra32);
         bitmap.Render(content);
