@@ -79,6 +79,8 @@ Dimensions en mètres, surfaces en m². Les rapports détaillés restent locaux 
 
 ## Mise à jour et désinstallation
 
+La désinstallation 0.6 demande d’enregistrer les projets et de fermer les sessions Revit actives. Leur liste est actualisée chaque seconde ; **Continuer** reste désactivé tant qu’une session est ouverte. Vous pouvez annuler à tout moment. Aucune session n’est fermée automatiquement. En mode silencieux, la présence de Revit bloque immédiatement l’opération.
+
 Lancez l’installateur d’une version plus récente pour mettre à jour le programme. Le complément sera chargé au prochain lancement de l’instance Revit concernée.
 
 Pour désinstaller la version commune, relancez l’EXE et choisissez **Désinstaller**, ou utilisez les applications installées de Windows, avec les droits administrateur. Les modèles, rapports et configurations personnelles sont conservés. Chaque utilisateur peut ensuite retirer l’entrée Dreamsign MCP de son assistant ; l’installateur commun ne parcourt pas les profils Windows.

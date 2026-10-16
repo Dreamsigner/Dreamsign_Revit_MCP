@@ -5,6 +5,12 @@
   <MediaTemplate EmbedCab="yes"/>
   <Property Id="MSIRESTARTMANAGERCONTROL" Value="Disable"/>
   <Property Id="REBOOT" Value="ReallySuppress"/>
+  <Property Id="DREAMSIGN_BUNDLE_DISPLAY" Secure="yes"/>
+  <Binary Id="DreamsignSessionGuard" SourceFile="$(var.Dreamsign.Setup.Guard.TargetDir)Dreamsign.Setup.Guard.CA.dll"/>
+  <CustomAction Id="WaitForRevitExit" BinaryRef="DreamsignSessionGuard" DllEntry="WaitForRevitExit" Execute="immediate" Return="check"/>
+  <InstallExecuteSequence>
+   <Custom Action="WaitForRevitExit" Before="InstallValidate" Condition="Installed AND REMOVE~=&quot;ALL&quot;"/>
+  </InstallExecuteSequence>
   <Property Id="EXISTING_SHARED_MANIFEST">
    <RegistrySearch Id="FindCommonDataRoot" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" Name="Common AppData" Type="directory" Bitness="always64">
     <DirectorySearch Id="FindSharedManifestDirectory" Path="Autodesk\Revit\Addins\2027" Depth="0">

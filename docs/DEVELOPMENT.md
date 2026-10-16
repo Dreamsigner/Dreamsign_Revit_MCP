@@ -82,6 +82,26 @@ La CI Windows restaure les dépendances verrouillées, teste hors Revit et publi
 
 ## Données et compatibilité
 
+Le projet `installer/Guard` est une action MSI C# / WPF, empaquetée par DTF
+6.0.2 en DLL native 64 bits. Son hôte exige .NET Framework 4.8, fourni par
+Windows sur le poste Revit pris en charge ; serveur et complément restent
+sur .NET 10. Aucun runtime supplémentaire n’est téléchargé par l’installateur.
+La configuration `CustomAction.config` est embarquée avec la DLL.
+
+`WaitForRevitExit` s’exécute immédiatement avant `InstallValidate` seulement
+pour `Installed AND REMOVE~="ALL"`. Elle ne modifie ni fichiers ni processus.
+La fenêtre WPF tourne sur un thread STA, vérifie les processus chaque seconde
+et retourne `UserExit` à l’annulation. Le bundle transmet son niveau d’affichage
+au MSI : seuls le mode complet de Burn ou le mode interactif du MSI peuvent
+ouvrir cette fenêtre ; les autres modes échouent sans attendre si Revit tourne.
+Le contrôle reste présent dans le MSI pour les désinstallations directes.
+
+Les tests lient les mêmes sources de détection et de fenêtre, vérifient le
+timer, les modes silencieux, la réouverture de Revit et l’échec de détection.
+Pour rendre l’aperçu WPF, définir `DREAMSIGN_GUARD_PREVIEW` vers un fichier PNG
+avant le test `UninstallGuardTests`. Vérifier aussi l’action réellement embarquée
+dans le MSI et le cycle complet sur un poste de test avant publication.
+
 Le serveur 0.6 accepte les bridges 0.3, 0.4 et 0.5 pendant la transition. Le nouveau plugin valide aussi les schémas reçus : l’ancien serveur avec le nouveau plugin n’est pas garanti. Mettre à jour les deux pour une installation normale.
 
 `configure` sauvegarde l’état quand le modèle change et réinitialise ses correspondances. Un changement de PID les conserve. L’ancien `project-state.json` peut être utilisé avec `--data-dir` pointant sur son dossier, après sauvegarde et vérification de sa cible. Aucun chemin de modèle n’est compilé dans le programme.

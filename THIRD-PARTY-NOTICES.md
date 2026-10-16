@@ -34,3 +34,6 @@ does not imply endorsement by Autodesk or the MCP SDK maintainers.
   Maintenance Fee agreement, reproduced in `installer/OSMFEULA.txt` in the source
   repository. Developers must review those terms for their use of the build
   tools. No paid service or purchase is performed by the application installer.
+  The MSI also embeds the DTF custom-action host and WindowsInstaller library
+  from the same WiX 6.0.2 source and license. The C# uninstall guard uses the
+  Windows-provided .NET Framework 4.8 runtime; it does not redistribute it.

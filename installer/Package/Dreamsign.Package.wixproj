@@ -5,4 +5,5 @@
   <DefineConstants>PayloadDirectory=$(PayloadDirectory)</DefineConstants>
  </PropertyGroup>
  <ItemGroup><PackageReference Include="WixToolset.Util.wixext" Version="6.0.2"/></ItemGroup>
+ <ItemGroup><ProjectReference Include="../Guard/Dreamsign.Setup.Guard.csproj"/></ItemGroup>
 </Project>

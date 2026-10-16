@@ -6,6 +6,7 @@
 - Interface WPF rouge, noire et blanche, contrôles cohérents, footer visible et mise en page adaptable.
 - Installation commune à l’ordinateur, avec serveur détecté automatiquement pour chaque utilisateur.
 - Migration explicite d’un ancien manifeste utilisateur, sauvegardé avant retrait.
+- Désinstallation bloquée tant que Revit est ouvert : liste des sessions actualisée chaque seconde, rappel d’enregistrer les projets et poursuite explicite après fermeture. Aucune fermeture forcée ; refus immédiat en mode silencieux.
 
 ### Changements
 - Connexion de l’assistant disponible après sélection du projet et détection du serveur.

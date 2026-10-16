@@ -28,6 +28,33 @@ une première installation pour éviter son remplacement sans vérification.
 
 ## Chemin conseillé depuis 0.5
 
+### Fermer Revit avant de désinstaller
+
+La désinstallation **0.6** vérifie les processus `Revit.exe` de l’ordinateur
+avant les contrôles de fichiers en cours d’utilisation et avant toute
+modification de l’installation. Si Revit est ouvert, une fenêtre demande
+d’enregistrer les projets et de fermer toutes les sessions, y compris celles
+des autres comptes Windows. La liste affiche les PID, les sessions Windows et
+les titres accessibles ; elle est actualisée chaque seconde. Une session dont
+le titre est inaccessible reste bloquante.
+
+**Continuer** reste désactivé jusqu’à la fermeture de toutes les sessions et
+vérifie à nouveau les processus au clic. **Annuler** ou fermer cette fenêtre
+annule la désinstallation. Le programme ne ferme ni ne termine aucun processus.
+Éviter de relancer Revit avant la fin de la désinstallation.
+
+En mode silencieux, passif ou non interactif, la présence de Revit provoque
+un échec immédiat, avec le motif dans le journal MSI ; aucune fenêtre n’attend
+une intervention. Une erreur de détection bloque aussi l’opération.
+
+Ce contrôle existe dans le MSI et s’applique également à sa désinstallation
+directe. Il n’ajoute pas rétroactivement ce comportement à la version **0.5** :
+pour retirer cette dernière, enregistrer les projets et fermer Revit soi-même.
+
+![Contrôle de désinstallation avec deux sessions d’exemple](images/uninstall-guard-0.6.png)
+
+### Passage à 0.6
+
 1. Depuis la session ayant installé 0.5, conserver son EXE et ses sauvegardes.
 2. Désinstaller 0.5 avec son EXE ou les applications installées de Windows. Sa désinstallation conserve les modèles, l’état et les rapports ; les modifications des configurations sont sauvegardées.
 3. Installer 0.6 pour l’ordinateur avec l’autorisation administrateur.
