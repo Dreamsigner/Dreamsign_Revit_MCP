@@ -1,7 +1,8 @@
 <Project Sdk="WixToolset.Sdk/6.0.2">
  <PropertyGroup>
-  <OutputName>Dreamsign_Revit_MCP_0.5.0_x64</OutputName><InstallerPlatform>x64</InstallerPlatform>
+  <OutputName>Dreamsign_Revit_MCP_0.6.0_x64</OutputName><InstallerPlatform>x64</InstallerPlatform>
   <PayloadDirectory Condition="'$(PayloadDirectory)' == ''">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../../artifacts/win-x64'))</PayloadDirectory>
   <DefineConstants>PayloadDirectory=$(PayloadDirectory)</DefineConstants>
  </PropertyGroup>
+ <ItemGroup><PackageReference Include="WixToolset.Util.wixext" Version="6.0.2"/></ItemGroup>
 </Project>

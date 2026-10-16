@@ -1,5 +1,5 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal">
- <Bundle Name="Dreamsign Revit MCP" Manufacturer="Dreamsigner" Version="0.5.0" UpgradeCode="703E489C-3AE0-4C8A-9DBC-8E68DDB33E1E">
+ <Bundle Name="Dreamsign Revit MCP" Manufacturer="Dreamsigner" Version="0.6.0" UpgradeCode="07BBE309-7A63-480C-88FA-2D13C36C119E">
   <BootstrapperApplication>
    <bal:WixStandardBootstrapperApplication Theme="hyperlinkLicense" LicenseUrl="https://github.com/Dreamsigner/Dreamsign_Revit_MCP/blob/main/LICENSE" SuppressOptionsUI="yes"/>
   </BootstrapperApplication>

@@ -55,10 +55,11 @@ public static class Program
     }
 
     public const string Help = """
-        Dreamsign Revit MCP 0.5.0 — C# / .NET 10 / Revit 2027
+        Dreamsign Revit MCP 0.6.0 — C# / .NET 10 / Revit 2027
         serve       [--profile inspection|workflow|modeling|diagnostic|full] [--data-dir DIR]
         configure   --document TITLE --path ABSOLUTE_RVT [--pid PID] [--data-dir DIR]
         connect     --client Codex|ClaudeDesktop|Cursor [--profile PROFILE] [--data-dir DIR]
+        migrate-user [--data-dir DIR]                Back up and remove this user's legacy override; never run elevated
         doctor      [--data-dir DIR]                 Read-only target/bridge check
         install     [--plugin-dir DIR] [--replace-existing] [--data-dir DIR]
         uninstall   [--data-dir DIR]                 Remove only this manifest

@@ -75,7 +75,8 @@ public class App : IExternalApplication {
     }
     static void Log(string op,string id,DateTime start,JsonObject r) {
         try {
-            var dir=Path.GetDirectoryName(typeof(App).Assembly.Location); var path=Path.Combine(dir,"bridge.log");
+            var dir=Path.Combine(LocalSettings.DefaultDirectory,"logs"); Directory.CreateDirectory(dir);
+            var path=Path.Combine(dir,"bridge-"+Environment.ProcessId+".log");
             if(File.Exists(path)&&new FileInfo(path).Length>262144) File.Move(path,path+".1",true);
             File.AppendAllText(path,new JsonObject { ["utc"]=start.ToString("o"),["request_id"]=id,["operation"]=op,["ms"]=(DateTime.UtcNow-start).TotalMilliseconds,["success"]=r["success"]?.DeepClone(),["number_of_elements"]=r["requested"]?.DeepClone()??r["count"]?.DeepClone(),["code"]=r["code"]?.DeepClone() }.ToJsonString()+"\n");
         } catch {} // Logging must never affect a transaction.

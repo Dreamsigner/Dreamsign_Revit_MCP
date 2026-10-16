@@ -52,7 +52,7 @@ public static class SetupLifecycle
     {
         using var lease = new StateStore(data).AcquireLease();
         var receipt = Path.Combine(data, "installation.json");
-        if (LocalSettings.InstalledServer(data) is not string installed || !string.Equals(installed, executable, StringComparison.OrdinalIgnoreCase))
+        if (LocalSettings.UserInstalledServer(data) is not string installed || !string.Equals(installed, executable, StringComparison.OrdinalIgnoreCase))
             return new() { ["success"] = true, ["removed"] = false };
         var result = Installation.Uninstall(manifests, data);
         try { ClientIntegration.RemoveRegistered(data, executable); }

@@ -12,7 +12,7 @@ public sealed class LiveRevitFactAttribute : FactAttribute
     public LiveRevitFactAttribute()
     {
         if (Environment.GetEnvironmentVariable("DREAMSIGN_RUN_REVIT_TESTS") != "1")
-            Skip = "Opt-in only: requires bridge 0.5 and a dedicated saved Dreamsign_MCP_* project";
+            Skip = "Opt-in only: requires bridge 0.6 and a dedicated saved Dreamsign_MCP_* project";
     }
 }
 
