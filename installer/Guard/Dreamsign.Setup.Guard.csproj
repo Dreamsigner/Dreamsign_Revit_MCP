@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup>
+  <TargetFramework>net48</TargetFramework><UseWPF>true</UseWPF><LangVersion>latest</LangVersion>
+  <Platform>x64</Platform><PlatformTarget>x64</PlatformTarget><AssemblyName>Dreamsign.Setup.Guard</AssemblyName>
+ </PropertyGroup>
+ <ItemGroup>
+  <Page Include="../../src/Dreamsign.Desktop/PanelTheme.xaml" Link="PanelTheme.xaml"/>
+  <Content Include="CustomAction.config"/>
+  <PackageReference Include="WixToolset.Dtf.CustomAction" Version="6.0.2"/>
+  <PackageReference Include="WixToolset.Dtf.WindowsInstaller" Version="6.0.2"/>
+ </ItemGroup>
+</Project>

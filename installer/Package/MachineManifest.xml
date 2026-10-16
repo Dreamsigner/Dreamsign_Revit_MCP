@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+ <AddIn Type="Application">
+  <Name>Dreamsign Revit MCP</Name>
+  <Assembly>SET_BY_WINDOWS_INSTALLER</Assembly>
+  <AddInId>82C55A6F-5AB5-4A4B-A8E0-4C0E4E6B08C1</AddInId>
+  <FullClassName>AstraRevitBridge.App</FullClassName>
+  <VendorId>DRMS</VendorId>
+  <VendorDescription>Dreamsigner</VendorDescription>
+  <AllowLoadIntoExistingSession>false</AllowLoadIntoExistingSession>
+ </AddIn>
+</RevitAddIns>

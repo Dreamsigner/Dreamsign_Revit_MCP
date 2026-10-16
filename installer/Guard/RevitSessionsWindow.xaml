@@ -1,0 +1,25 @@
+<Window x:Class="Dreamsign.Setup.RevitSessionsWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ Title="Dreamsign MCP — Fermer Revit" Width="640" Height="500" MinWidth="540" MinHeight="450" WindowStartupLocation="CenterScreen"
+ Background="#F7F7F8" Foreground="#191919" FontFamily="Segoe UI" FontSize="14" ResizeMode="CanResize">
+ <Window.Resources>
+  <ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceDictionary Source="PanelTheme.xaml"/></ResourceDictionary.MergedDictionaries></ResourceDictionary>
+ </Window.Resources>
+ <Grid Margin="30">
+  <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+  <StackPanel>
+   <TextBlock Text="DREAMSIGN MCP · DÉSINSTALLATION" Foreground="#CD2035" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,12"/>
+   <TextBlock Text="Fermez Revit pour continuer" FontSize="27" FontWeight="SemiBold" TextWrapping="Wrap"/>
+  </StackPanel>
+  <TextBlock Grid.Row="1" Margin="0,14,0,20" TextWrapping="Wrap" Foreground="#626262" Text="Enregistrez vos projets, puis fermez toutes les sessions Revit actives sur cet ordinateur, y compris celles des autres utilisateurs Windows."/>
+  <Border Grid.Row="2" Background="White" BorderBrush="#E3E3E6" BorderThickness="1" CornerRadius="12" Padding="12">
+   <ListBox x:Name="SessionList" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled" AutomationProperties.Name="Sessions Revit actives">
+    <ListBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="4,8"/></DataTemplate></ListBox.ItemTemplate>
+   </ListBox>
+  </Border>
+  <TextBlock x:Name="StatusText" Grid.Row="3" Margin="0,14,0,20" TextWrapping="Wrap" Foreground="#626262" AutomationProperties.LiveSetting="Polite"/>
+  <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+   <Button Content="Annuler" IsCancel="True" Margin="0,0,12,0" Click="CancelClick"/>
+   <Button x:Name="ContinueButton" Content="Continuer" IsEnabled="False" IsDefault="True" Style="{StaticResource PrimaryButton}" Click="ContinueClick"/>
+  </StackPanel>
+ </Grid>
+</Window>

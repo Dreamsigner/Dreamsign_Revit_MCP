@@ -1,0 +1,24 @@
+<Project>
+ <UsingTask TaskName="ValidateDreamsignPayload" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
+  <ParameterGroup><Directory ParameterType="System.String" Required="true"/><ExpectedVersion ParameterType="System.String" Required="true"/></ParameterGroup>
+  <Task><Using Namespace="System"/><Using Namespace="System.IO"/><Using Namespace="System.Diagnostics"/>
+   <Code Type="Method" Language="cs"><![CDATA[
+   public override bool Execute() {
+    var expected = new Version(ExpectedVersion);
+    foreach (var relative in new[] { "Dreamsign.Revit.Mcp.exe", "addin/Dreamsign.Revit.dll", "addin/Dreamsign.Contracts.dll", "addin/Dreamsign.Desktop.dll" })
+    {
+        var path = Path.Combine(Directory, relative);
+        if (!File.Exists(path)) { Log.LogError("Payload file missing: {0}", path); continue; }
+        var file = FileVersionInfo.GetVersionInfo(path);
+        if (file.FileMajorPart != expected.Major || file.FileMinorPart != expected.Minor || file.FileBuildPart != expected.Build || file.FilePrivatePart != 0)
+            Log.LogError("Stale payload: {0} is {1}; expected {2}.0. Rebuild the plugin and republish the server with IncludeRevitAddin=true before packaging.", relative, file.FileVersion, ExpectedVersion);
+    }
+    return !Log.HasLoggedErrors;
+   }
+   ]]></Code>
+  </Task>
+ </UsingTask>
+ <Target Name="ValidatePayloadVersion" BeforeTargets="CoreCompile">
+  <ValidateDreamsignPayload Directory="$(PayloadDirectory)" ExpectedVersion="$(Version)"/>
+ </Target>
+</Project>

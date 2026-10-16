@@ -9,7 +9,7 @@ public sealed record CommandOptions(string Command, string DataDirectory, string
     {
         if (args.Contains("--help", StringComparer.Ordinal)) return new("help", "", "workflow", new Dictionary<string, string>(), false);
         var command = args.Length > 0 && !args[0].StartsWith("--", StringComparison.Ordinal) ? args[0] : "serve";
-        if (!new[] { "serve", "configure", "doctor", "install", "uninstall", "catalog", "connect", "setup-install", "setup-rollback", "setup-commit", "setup-uninstall" }.Contains(command)) throw new ArgumentException("Unknown command: " + command);
+        if (!new[] { "serve", "configure", "doctor", "install", "uninstall", "catalog", "connect", "migrate-user", "setup-install", "setup-rollback", "setup-commit", "setup-uninstall" }.Contains(command)) throw new ArgumentException("Unknown command: " + command);
         var values = new Dictionary<string, string>(StringComparer.Ordinal);
         var replace = false;
         for (var i = command == "serve" && (args.Length == 0 || args[0].StartsWith("--", StringComparison.Ordinal)) ? 0 : 1; i < args.Length; i++)

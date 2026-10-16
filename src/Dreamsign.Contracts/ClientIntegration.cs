@@ -150,11 +150,24 @@ public static class LocalSettings
 {
     public static string DefaultDirectory => Environment.GetEnvironmentVariable("DREAMSIGN_MCP_DATA_DIR") ??
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DreamsignRevitMCP");
-    public static string? InstalledServer(string dataDirectory)
+    public static string? InstalledServer(string dataDirectory) => InstalledServer(dataDirectory, MachineServer());
+    public static string? InstalledServer(string dataDirectory, string? machineServer) =>
+        ValidServer(machineServer) ? machineServer : UserInstalledServer(dataDirectory);
+    public static string? MachineServer()
+    {
+        if (!OperatingSystem.IsWindows()) return null;
+        using var machine = Microsoft.Win32.RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.LocalMachine, Microsoft.Win32.RegistryView.Registry64);
+        using var key = machine.OpenSubKey(@"SOFTWARE\Dreamsigner\RevitMCP");
+        var executable = key?.GetValue("Server") as string;
+        return ValidServer(executable) ? executable : null;
+    }
+    public static string? UserInstalledServer(string dataDirectory)
     {
         var path = Path.Combine(dataDirectory, "installation.json");
         if (!File.Exists(path)) return null;
         var executable = JsonNode.Parse(File.ReadAllText(path))?["executable"]?.ToString();
-        return executable is not null && Path.IsPathFullyQualified(executable) && Path.GetFileName(executable) == "Dreamsign.Revit.Mcp.exe" && File.Exists(executable) ? executable : null;
+        return ValidServer(executable) ? executable : null;
     }
+    private static bool ValidServer(string? executable) => executable is not null && Path.IsPathFullyQualified(executable)
+        && Path.GetFileName(executable) == "Dreamsign.Revit.Mcp.exe" && File.Exists(executable);
 }

@@ -7,13 +7,24 @@
 
 Dreamsign Revit MCP permet d’explorer un modèle, de créer des éléments et d’automatiser des tâches BIM dans **Revit 2027 sur Windows**. Il s’adresse aux architectes, équipes BIM et développeurs utilisant un assistant compatible MCP.
 
-## Installer
+## Version en préparation
 
-1. Téléchargez **[Dreamsign_MCP_Setup_0.5.0.exe](https://github.com/Dreamsigner/Dreamsign_Revit_MCP/releases/download/v0.5.0/Dreamsign_MCP_Setup_0.5.0.exe)** depuis les [Releases](https://github.com/Dreamsigner/Dreamsign_Revit_MCP/releases).
-2. Lancez l’EXE avec votre compte Windows habituel, puis choisissez **Installer**. Le serveur et le complément Revit sont installés pour ce compte.
-3. Ouvrez Revit 2027. S’il était déjà ouvert, enregistrez votre travail et relancez uniquement l’instance qui utilisera le complément.
+Cette branche prépare la **version 0.6**, avec une nouvelle interface et une installation commune à l’ordinateur. Son installateur n’est pas encore publié : voir le [rapport de validation](docs/VALIDATION-0.6.md).
+
+La dernière version publiée reste **[la version 0.5.0](https://github.com/Dreamsigner/Dreamsign_Revit_MCP/releases/tag/v0.5.0)**, qui s’installe pour un seul utilisateur. Les étapes suivantes concernent la version 0.6.
+
+## Installer la version 0.6
+
+1. Lancez **Dreamsign_MCP_Setup_0.6.0.exe** et autorisez l’installation avec un compte administrateur. Le serveur et le complément sont installés une seule fois pour tous les utilisateurs du poste.
+2. Ouvrez ensuite Revit 2027 et votre assistant dans votre session Windows habituelle, sans droits administrateur.
+3. Si Revit était déjà ouvert, le nouveau complément sera disponible lors du prochain lancement de l’instance concernée.
+4. Le complément n’étant pas encore signé, Revit peut demander une confirmation de chargement. Vérifiez le nom **Dreamsign Revit MCP** et le chemin `Program Files\DreamsignRevitMCP\0.6.0\addin\Dreamsign.Revit.dll`, puis choisissez **Charger une fois** pour le premier essai.
 
 L’installateur contient les composants nécessaires : **aucune compilation n’est demandée aux utilisateurs**. Revit 2027 et votre assistant IA doivent déjà être installés. Le programme ne ferme aucune instance Revit automatiquement.
+
+Chaque utilisateur choisit son projet et configure son assistant séparément. Aucun nom de compte Windows n’est fixé dans le programme ; les paramètres, rapports et autorisations de projet ne sont pas partagés entre les comptes par défaut.
+
+Si une version 0.5 est déjà présente, consultez d’abord le [guide de migration](docs/MACHINE-INSTALLATION.md). Un ancien complément propre à l’utilisateur peut empêcher le chargement de l’installation commune.
 
 ## Choisir le projet et connecter l’assistant
 
@@ -25,9 +36,9 @@ Dans Revit :
 4. Choisissez **Codex**, **Claude Desktop** ou **Cursor**, puis le mode d’utilisation et **Configurer la connexion**.
 5. Cliquez sur **Terminer**, puis rechargez la connexion MCP dans votre assistant. Commencez par lui demander de lire le document actif et les niveaux.
 
-La fenêtre affiche le projet ciblé, l’état du bridge et le dernier contact reçu. **Diagnostic** aide à repérer un projet non enregistré, une cible différente ou un serveur manquant. **Paramètres avancés** permet de copier la configuration pour un autre client compatible MCP.
+La fenêtre affiche le projet ciblé, l’état du bridge et le dernier contact reçu. **Diagnostic** aide à repérer un projet non enregistré, une cible différente ou un serveur manquant. **Configuration avancée** permet de copier la configuration pour un autre client compatible MCP. La connexion devient disponible après sélection du projet et détection du serveur installé.
 
-![Panneau Dreamsign MCP dans Revit, avec un projet d’exemple](docs/images/control-panel.png)
+![Nouvelle interface Dreamsign MCP, avec un projet d’exemple](docs/images/control-panel-0.6.png)
 
 La configuration existante de l’assistant est sauvegardée avant modification. Les autres serveurs MCP sont conservés. La présence d’une configuration ne garantit pas que le client est installé ou connecté : rechargez sa connexion après chaque changement.
 
@@ -69,15 +80,18 @@ Dimensions en mètres, surfaces en m². Les rapports détaillés restent locaux 
 
 ## Mise à jour et désinstallation
 
+La désinstallation 0.6 demande d’enregistrer les projets et de fermer les sessions Revit actives. Leur liste est actualisée chaque seconde ; **Continuer** reste désactivé tant qu’une session est ouverte. Vous pouvez annuler à tout moment. Aucune session n’est fermée automatiquement. En mode silencieux, la présence de Revit bloque immédiatement l’opération.
+
 Lancez l’installateur d’une version plus récente pour mettre à jour le programme. Le complément sera chargé au prochain lancement de l’instance Revit concernée.
 
-Pour désinstaller, relancez l’EXE et choisissez **Désinstaller**, ou utilisez les applications installées de Windows. Les modèles et rapports sont conservés. Une configuration cliente modifiée manuellement est préservée si elle ne correspond plus à l’entrée installée.
+Pour désinstaller la version commune, relancez l’EXE et choisissez **Désinstaller**, ou utilisez les applications installées de Windows, avec les droits administrateur. Les modèles, rapports et configurations personnelles sont conservés. Chaque utilisateur peut ensuite retirer l’entrée Dreamsign MCP de son assistant ; l’installateur commun ne parcourt pas les profils Windows.
 
 ## Développement
 
 Le projet utilise C#/.NET 10, WPF pour son interface et WiX/Burn pour son installateur Windows. La compilation depuis les sources est destinée aux développeurs : voir **[DEVELOPMENT.md](docs/DEVELOPMENT.md)**.
 
-- [Périmètre du parcours utilisateur](docs/USER-EXPERIENCE.md)
+- [Conception de la version 0.6](docs/REFINEMENT-0.6.md)
+- [Installation commune et migration](docs/MACHINE-INSTALLATION.md)
 - [Architecture et migration C#](docs/CSHARP-MIGRATION.md)
 - [Notices des dépendances](THIRD-PARTY-NOTICES.md)
 

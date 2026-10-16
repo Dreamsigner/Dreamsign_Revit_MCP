@@ -1,0 +1,109 @@
+# Validation de la préparation 0.6
+
+Contrôles réalisés le 16 octobre 2026. Cette branche prépare une PR et aucune
+release 0.6 n’est publiée. Le cycle automatisé de maintenance a été exécuté
+sur le poste avec autorisation ; la version 0.6 reste installée à son issue.
+
+| Contrôle | Résultat |
+|---|---|
+| Compilation Release contre Revit 2027 local | Réussie, sans avertissement |
+| Tests hors Revit | 63 réussis, dont configuration, migration, états du panneau, contrôle de désinstallation et emplacement commun Revit 2027 |
+| Tests natifs Revit 0.6 | Non exécutés : les 2 tests natifs restent volontairement exclus |
+| Chargement natif du complément | Confirmé dans Revit 2027.2 : DLL chargée 0.6.0.0, démarrage API_SUCCESS, AddInLoadFailureMessage=NoError et bouton DreamsignMCPControl enregistré |
+| Rendu WPF | Inspecté : taille normale, taille minimale 600 × 600 et liste d’assistants ; palette rouge/noir/blanc et gris neutres |
+| États du panneau | Connexion désactivée avant sélection ou sans serveur ; clic explicite, profil choisi, liste déroulante et configuration avancée vérifiés |
+| Construction EXE/MSI | Réussie, sans avertissement ni suppression de contrôles MSI |
+| Fenêtre de désinstallation | Rendu WPF inspecté sous .NET 10 et sous l’hôte .NET Framework 4.8 ; timer testé, blocage de Continuer, nouvelle session au clic et erreur de détection vérifiés |
+| Action du MSI seule, sans installation | DLL DTF embarquée chargée dans CLR v4 : succès sans Revit, refus MSI 1603 avec un processus factice nommé Revit, succès après retrait de la fixture ; le contrôle ne ferme pas ce processus |
+| Inspection du MSI construit | ALLUSERS=1, registre HKLM, manifeste commun et chemin DLL formaté ; aucune action du serveur élevée |
+| Garde-fou de manifeste préexistant | Action AppSearch et conditions MSI vérifiées : racine système réelle détectée, copie à racine temporaire avec manifeste présent refusé et préservé, absence acceptée et racine inconnue refusée ; aucune écriture du registre de test |
+| Image administrative du MSI | Extraction réussie dans le dossier de contrôle ; aucun changement des manifestes actifs ou des processus Revit observés |
+| Installation/réparation/désinstallation commune sur le poste | Cycle réel via l’EXE en mode silencieux réussi : réparation 0, désinstallation 0, réinstallation 0 ; aucun redémarrage |
+| Refus de désinstallation réelle avec Revit actif | Processus factice isolé nommé Revit : échec attendu 1603, installation et manifeste préservés, processus laissé ouvert par le contrôle |
+| État après réinstallation | 38 fichiers personnels inchangés, 5 binaires identiques au payload publié localement, manifeste commun restauré à l’identique |
+| Migration réelle de plusieurs comptes | Non exécutée ; tests sur fixtures isolées seulement |
+
+## Vérification du contenu et du chargement
+
+La vérification dans Revit a détecté deux défauts que le premier cycle de
+maintenance ne révélait pas : le paquet étiqueté 0.6 contenait encore les
+binaires 0.5 du dossier de publication, et le manifeste commun était placé
+sous ProgramData, emplacement ignoré par Revit 2027. Les premiers résultats
+de réparation/désinstallation et les comparaisons d’empreintes étaient valides
+pour ce paquet, mais ne prouvaient pas que le complément 0.6 était chargé.
+
+Le serveur et le complément ont été reconstruits et republiés ; les quatre
+binaires Dreamsign portent maintenant la version 0.6.0.0. La construction du
+MSI refuse désormais toute version divergente ou tout fichier manquant. Le
+rejet a été vérifié pour les quatre anciens fichiers et pour un payload 0.6
+présenté à une construction exigeant 0.5 ; le paquet correct compile sans
+avertissement. Le cycle de maintenance a aussi été rejoué après cette correction.
+
+Le MSI et la migration utilisent maintenant
+`%ProgramFiles%\Autodesk\Revit\Addins\2027`. Le composant du manifeste a un
+nouveau GUID, puisque son emplacement change. La recherche de conflits est
+vérifiée dans le MSI final : absence acceptée et manifeste étranger refusé
+sur une fixture isolée. Le changement d’emplacement est confirmé par le
+[SDK officiel Revit 2027](https://blog.autodesk.io/revit-2027-sdk-net-10-api-changes-and-additions/#add-in-installation-folder-changes)
+et par le refus explicite inscrit dans le journal de démarrage de Revit.
+
+Le diagnostic `ping_revit` rapporte aussi la version réellement chargée,
+l’enregistrement du panneau et `Application.AllUsersAddinsLocation`.
+Le paquet corrigé a ensuite passé le cycle complet de maintenance et le
+chargement réel dans Revit 2027.2, après confirmation manuelle du complément
+non signé. Le journal indique `API_SUCCESS`, la version d’assembly 0.6.0.0,
+`AddInLoadFailureMessage: NoError` et l’enregistrement du bouton
+`DreamsignMCPControl`. Les modules chargés confirment les mêmes chemins et
+versions. Un appel direct au bridge à l’accueil retourne `WRONG_DOCUMENT`,
+refus attendu en l’absence de projet actif : le bridge répond sans ouvrir ni
+modifier de modèle. Les deux tests natifs sur un modèle restent distincts et
+non exécutés.
+
+Les preuves du cycle final, les versions et les empreintes des cinq fichiers
+installés ainsi que le journal de chargement restent privés sous
+`.local/revit2027-lifecycle-20261016-133200`. L’ancien manifeste ProgramData
+est absent ; les 38 fichiers personnels contrôlés restent inchangés.
+
+La migration testée sauvegarde le manifeste reconnu, refuse un manifeste
+étranger ou une installation commune incomplète et conserve l’état de projet et
+les fichiers clients. Le serveur commun est prioritaire sur un ancien reçu
+personnel ; une installation personnelle valide reste utilisable en repli.
+
+Les captures proviennent du vrai panneau WPF exécuté dans le processus de test,
+pas d’une maquette HTML. Le clic sur le ruban Revit, le parcours clavier complet,
+les lecteurs d’écran, la haute résolution et le fonctionnement avec plusieurs
+sessions Windows restent à vérifier manuellement. Aucune instance Revit n’a été
+fermée ou redémarrée et aucun modèle utilisateur n’a été modifié.
+
+Le contrôle de désinstallation précède `InstallValidate` (séquence 1399, puis
+1400) et `InstallInitialize` (1500), vérifié dans le MSI final. La DLL DTF est
+native x64 et embarque sa configuration CLR v4. Le test d’inversion du blocage
+fait échouer le test WPF, puis les 62 tests repassent après restauration.
+L’appel isolé de l’action MSI ne lance pas les séquences d’installation ou de
+suppression. Un second contrôle a ensuite exécuté les vraies opérations via
+l’EXE avec une seule autorisation administrateur. La réparation, le refus de
+désinstallation avec un processus factice, la désinstallation et la
+réinstallation ont été vérifiés par codes de sortie, registre, manifestes et
+empreintes des fichiers. Aucun computer use n’a été utilisé pour ce cycle.
+Les journaux complets restent privés sous `.local/lifecycle-20261016-130218`.
+
+Le parcours interactif EXE → MSI → fenêtre → annulation/reprise, ainsi que les
+sessions de plusieurs utilisateurs réels, restent à tester sur un poste isolé
+avant publication. Le succès du cycle silencieux ne valide pas ces parcours.
+
+Un premier contrôle GitHub a exposé une course dans l’ancien test de transport :
+son budget de 400 ms pouvait expirer avant connexion, alors que le test attendait
+un résultat inconnu après envoi. Le pair de test démarre désormais son attente
+directement et déclenche l’annulation après réception de la requête. Les
+assertions d’identité, de taille, de réponse incomplète et de résultat inconnu
+restent présentes ; aucun test n’a été désactivé. Le transport du produit n’a
+pas été modifié par cette correction de fixture.
+
+Le nouveau paquet est d’une portée différente de 0.5 : son extraction ne prouve
+pas que l’erreur 2203 du parcours automatisé est corrigée. Conserver les limites
+du [rapport 0.5](VALIDATION-0.5.md). Les binaires restent non signés.
+
+Avant une release : tester le cycle complet sur un poste isolé avec un compte
+administrateur et deux utilisateurs ordinaires, y compris un ancien manifeste
+utilisateur, un manifeste commun étranger et le rollback. Vérifier que chacun
+garde ses propres projets, réglages et journaux.

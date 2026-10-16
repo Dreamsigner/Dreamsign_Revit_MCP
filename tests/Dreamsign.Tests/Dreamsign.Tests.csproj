@@ -1,6 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><IsTestProject>true</IsTestProject><IsPackable>false</IsPackable><TargetFramework>net10.0-windows</TargetFramework><UseWPF>true</UseWPF></PropertyGroup>
   <ItemGroup>
+    <Compile Include="../../installer/Guard/RevitSessions.cs;../../installer/Guard/RevitSessionsWindow.xaml.cs" Link="SetupGuard/%(Filename)%(Extension)"/>
+    <Page Include="../../installer/Guard/RevitSessionsWindow.xaml" Link="SetupGuard/RevitSessionsWindow.xaml"/>
+    <Page Include="../../src/Dreamsign.Desktop/PanelTheme.xaml" Link="SetupGuard/PanelTheme.xaml"/>
     <ProjectReference Include="../../src/Dreamsign.Server/Dreamsign.Server.csproj" />
     <ProjectReference Include="../../src/Dreamsign.Desktop/Dreamsign.Desktop.csproj" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />

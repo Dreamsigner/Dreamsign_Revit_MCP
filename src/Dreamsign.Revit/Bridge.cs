@@ -75,7 +75,8 @@ public class App : IExternalApplication {
     }
     static void Log(string op,string id,DateTime start,JsonObject r) {
         try {
-            var dir=Path.GetDirectoryName(typeof(App).Assembly.Location); var path=Path.Combine(dir,"bridge.log");
+            var dir=Path.Combine(LocalSettings.DefaultDirectory,"logs"); Directory.CreateDirectory(dir);
+            var path=Path.Combine(dir,"bridge-"+Environment.ProcessId+".log");
             if(File.Exists(path)&&new FileInfo(path).Length>262144) File.Move(path,path+".1",true);
             File.AppendAllText(path,new JsonObject { ["utc"]=start.ToString("o"),["request_id"]=id,["operation"]=op,["ms"]=(DateTime.UtcNow-start).TotalMilliseconds,["success"]=r["success"]?.DeepClone(),["number_of_elements"]=r["requested"]?.DeepClone()??r["count"]?.DeepClone(),["code"]=r["code"]?.DeepClone() }.ToJsonString()+"\n");
         } catch {} // Logging must never affect a transaction.
@@ -130,7 +131,7 @@ partial class Handler : IExternalEventHandler {
         }
         if(Str(req,"expected_document")==""||d==null||d.Title!=Str(req,"expected_document"))throw new InvalidOperationException("WRONG_DOCUMENT: target document must be active; no action executed");
         string expectedPath=Str(req,"expected_document_path");if(expectedPath!=""&&!string.Equals(Path.GetFullPath(d.PathName),Path.GetFullPath(expectedPath),StringComparison.OrdinalIgnoreCase))throw new InvalidOperationException("WRONG_DOCUMENT_PATH: no action executed");
-        if(op=="ping_revit") return new JsonObject{["success"]=true,["pid"]=Environment.ProcessId,["revit_running"]=true,["addin_loaded"]=true,["available"]=true,["document_open"]=d!=null,["revit_version"]=ui.Application.VersionNumber,["build"]=ui.Application.VersionBuild,["previous_error"]=App.Errors.Count>0};
+        if(op=="ping_revit") return new JsonObject{["success"]=true,["pid"]=Environment.ProcessId,["revit_running"]=true,["addin_loaded"]=true,["available"]=true,["document_open"]=d!=null,["revit_version"]=ui.Application.VersionNumber,["build"]=ui.Application.VersionBuild,["bridge_version"]=ToolCatalog.Version,["ui_available"]=App.PanelRegistered,["all_users_addins_location"]=ui.Application.AllUsersAddinsLocation,["previous_error"]=App.Errors.Count>0};
         if(op=="get_last_errors") {lock(App.Gate)return new JsonObject{["success"]=true,["errors"]=new JsonArray(App.Errors.Select(x=>(JsonNode)x.DeepClone()).ToArray())};}
         if(d==null)throw new InvalidOperationException("NO_ACTIVE_DOCUMENT");
         if(op=="get_active_document")return new JsonObject{["success"]=true,["document"]=d.Title,["path"]=d.PathName,["pid"]=Environment.ProcessId,["bridge_version"]=ToolCatalog.Version,["revision"]=Revision(d),["document_token"]=Token(d),["revit_version"]=ui.Application.VersionNumber,["read_only"]=d.IsReadOnly,["is_family"]=d.IsFamilyDocument,["ui_available"]=App.PanelRegistered};

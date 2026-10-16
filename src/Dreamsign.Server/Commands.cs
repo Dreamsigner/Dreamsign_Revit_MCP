@@ -11,6 +11,12 @@ public static class Commands
         JsonNode result;
         switch (options.Command)
         {
+            case "migrate-user":
+                UserMigration.RequireStandardUser();
+                var sharedServer = LocalSettings.MachineServer() ?? throw new InvalidOperationException("Installez d’abord la version commune à l’ordinateur.");
+                result = UserMigration.Prepare(Installation.DefaultManifestDirectory, store.DirectoryPath, sharedServer,
+                    Path.Combine(Installation.MachineManifestDirectory, Installation.ManifestName));
+                break;
             case "connect":
                 if (!Enum.TryParse<DesktopClient>(options.Require("client"), true, out var client) || !Enum.IsDefined(client)) throw new ArgumentException("Client inconnu : Codex, ClaudeDesktop ou Cursor attendu.");
                 var connection = ClientIntegration.Configure(client, ClientIntegration.ConfigurationPath(client),

@@ -38,7 +38,7 @@ Les tests couvrent contrats, profils, refus d’arguments, ciblage, résumés d�
 
 Le test crée un niveau temporaire, prévisualise puis applique une modification, vérifie l’invalidation d’une capture et le refus de rejouer le plan, compare les captures puis supprime son niveau. Il ne sauvegarde pas automatiquement. Une erreur de transport peut nécessiter une vérification manuelle des éléments préfixés `Dreamsign_MCP_`.
 
-Préparez un projet dédié **Dreamsign_MCP_*** enregistré et actif dans Revit 2027 avec le plugin **0.5** chargé. Configurez-le dans un dossier d’état réservé. Définissez dans l’environnement du terminal :
+Préparez un projet dédié **Dreamsign_MCP_*** enregistré et actif dans Revit 2027 avec le plugin **0.6** chargé. Configurez-le dans un dossier d’état réservé. Définissez dans l’environnement du terminal :
 
 | Variable | Valeur |
 |---|---|
@@ -66,11 +66,13 @@ L’exécutable intègre serveur et runtime .NET. `addin` contient le plugin, Co
 dotnet build installer/Bundle/Dreamsign.Setup.wixproj -c Release
 ```
 
-Le résultat est `installer/Bundle/bin/Release/Dreamsign_MCP_Setup_0.5.0.exe`. Le bundle WiX/Burn 6.0.2 contient un MSI utilisateur. Windows Installer possède les fichiers sous `%LOCALAPPDATA%/Programs/DreamsignRevitMCP/0.5.0` ; ses actions C# réversibles enregistrent les DLL dans un cache versionné et sauvegardent le manifeste existant. Le rollback restaure le manifeste et le reçu d’installation. La désinstallation ne retire les configurations clientes que lorsqu’elles pointent vers son exécutable exact. Modèles, état et rapports restent conservés.
+Le résultat est `installer/Bundle/bin/Release/Dreamsign_MCP_Setup_0.6.0.exe`. Le bundle WiX/Burn 6.0.2 contient un MSI `perMachine` : fichiers sous `%ProgramFiles%/DreamsignRevitMCP/0.6.0`, registre HKLM en vue 64 bits et manifeste sous `%ProgramFiles%/Autodesk/Revit/Addins/2027`. L’action native WiX XmlFile renseigne le chemin absolu de la DLL ; le serveur n’est pas exécuté avec élévation pour enregistrer l’installation. L’installation machine ne lit aucun reçu personnel et ne modifie aucune configuration d’assistant.
 
-Le gestionnaire de redémarrage est désactivé et les redémarrages forcés supprimés. Le MSI interdit `ALLUSERS` : les avertissements ICE91 signalent des chemins volontairement utilisateur, et non une distribution pour tous les comptes. Les autres contrôles MSI restent actifs. Pour une nouvelle version changeant les dossiers et clés de composants, renouveler leurs GUID conformément aux règles Windows Installer ; ne pas modifier une release déjà publiée. Une reconstruction locale de la même version se teste après désinstallation de la construction précédente, pas comme une mise à niveau.
+Le gestionnaire de redémarrage est désactivé et les redémarrages forcés supprimés. `AllowLoadIntoExistingSession=false` reporte le chargement au prochain lancement volontaire de Revit. Les contrôles MSI restent actifs. L’UpgradeCode machine et celui du bundle sont distincts de la famille 0.5 par utilisateur : pas de suppression automatique des installations privées d’autres comptes. Pour une nouvelle version changeant les dossiers de composants, renouveler leurs GUID et ne pas modifier une release déjà publiée.
 
-Le serveur conserve les commandes avancées `configure`, `doctor`, `connect`, `install` et `uninstall`. Les commandes `setup-*` sont réservées au cycle MSI. L’interface normale est **Compléments → Dreamsign MCP** : fenêtre modale de configuration, à fermer avec **Terminer** avant les appels de l’assistant. Le bouton ne change aucun élément du modèle ; le ciblage et la configuration partagent le même verrou que le serveur.
+La découverte du serveur lit HKLM, puis se replie sur un reçu personnel valide pour la compatibilité. Les paramètres, rapports et autorisations restent sous LocalAppData de chaque utilisateur. Le pipe conserve `CurrentUserOnly` ; les journaux vont dans `logs/bridge-PID.log`. La migration `migrate-user` est explicite et refuse l’exécution élevée. Elle sauvegarde et retire uniquement l’ancien manifeste utilisateur reconnu, après contrôle du manifeste commun ; elle ne touche pas aux projets ni aux clients. Voir [MACHINE-INSTALLATION.md](MACHINE-INSTALLATION.md).
+
+Les commandes avancées `install`, `uninstall` et `setup-*` restent disponibles pour les installations privées et la compatibilité de leurs tests ; elles ne sont pas utilisées par le nouveau MSI commun. `SetupLifecycle` vérifie son propre reçu privé pour une désinstallation, indépendamment de la découverte d’un serveur commun plus récent. L’interface normale est **Compléments → Dreamsign MCP**, à fermer avec **Terminer** avant les appels de l’assistant. Le panneau conserve le verrou d’état partagé et vérifie aussi le PID lorsqu’il a été fixé.
 
 Les paramètres des clients Codex (TOML), Claude Desktop et Cursor (JSON) sont sauvegardés puis mis à jour par C#. Tomlyn conserve les données et commentaires TOML ; les autres serveurs et réglages sont conservés. Une entrée étrangère n’est pas écrasée. Les ACL existantes sont conservées lors du remplacement atomique d’un fichier de configuration.
 
@@ -80,7 +82,38 @@ La CI Windows restaure les dépendances verrouillées, teste hors Revit et publi
 
 ## Données et compatibilité
 
-Le serveur 0.5 accepte les bridges 0.3 et 0.4 pendant la transition. Le nouveau plugin valide aussi les schémas reçus : l’ancien serveur avec le nouveau plugin n’est pas garanti. Mettre à jour les deux pour une installation normale.
+`installer/Package/ValidatePayload.targets` vérifie avant chaque compilation
+du MSI les versions de fichiers du serveur EXE et des trois DLL Dreamsign du
+dossier de publication. Un fichier manquant ou d’une autre version bloque la
+construction, même si le manifeste et les chemins sont corrects. Recompiler
+le plugin puis republier avec `IncludeRevitAddin=true` : reconstruire seulement
+le MSI ne renouvelle pas les binaires du dossier `artifacts/win-x64`.
+
+Le contrôle peut être exercé séparément avec `dotnet msbuild
+installer/Package/Dreamsign.Package.wixproj -t:ValidatePayloadVersion
+-p:Version=0.5.0` : un payload 0.6 doit alors être refusé pour les quatre fichiers.
+
+Le projet `installer/Guard` est une action MSI C# / WPF, empaquetée par DTF
+6.0.2 en DLL native 64 bits. Son hôte exige .NET Framework 4.8, fourni par
+Windows sur le poste Revit pris en charge ; serveur et complément restent
+sur .NET 10. Aucun runtime supplémentaire n’est téléchargé par l’installateur.
+La configuration `CustomAction.config` est embarquée avec la DLL.
+
+`WaitForRevitExit` s’exécute immédiatement avant `InstallValidate` seulement
+pour `Installed AND REMOVE~="ALL"`. Elle ne modifie ni fichiers ni processus.
+La fenêtre WPF tourne sur un thread STA, vérifie les processus chaque seconde
+et retourne `UserExit` à l’annulation. Le bundle transmet son niveau d’affichage
+au MSI : seuls le mode complet de Burn ou le mode interactif du MSI peuvent
+ouvrir cette fenêtre ; les autres modes échouent sans attendre si Revit tourne.
+Le contrôle reste présent dans le MSI pour les désinstallations directes.
+
+Les tests lient les mêmes sources de détection et de fenêtre, vérifient le
+timer, les modes silencieux, la réouverture de Revit et l’échec de détection.
+Pour rendre l’aperçu WPF, définir `DREAMSIGN_GUARD_PREVIEW` vers un fichier PNG
+avant le test `UninstallGuardTests`. Vérifier aussi l’action réellement embarquée
+dans le MSI et le cycle complet sur un poste de test avant publication.
+
+Le serveur 0.6 accepte les bridges 0.3, 0.4 et 0.5 pendant la transition. Le nouveau plugin valide aussi les schémas reçus : l’ancien serveur avec le nouveau plugin n’est pas garanti. Mettre à jour les deux pour une installation normale.
 
 `configure` sauvegarde l’état quand le modèle change et réinitialise ses correspondances. Un changement de PID les conserve. L’ancien `project-state.json` peut être utilisé avec `--data-dir` pointant sur son dossier, après sauvegarde et vérification de sa cible. Aucun chemin de modèle n’est compilé dans le programme.
 
