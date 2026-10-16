@@ -9,6 +9,7 @@ sur le poste avec autorisation ; la version 0.6 reste installée à son issue.
 | Compilation Release contre Revit 2027 local | Réussie, sans avertissement |
 | Tests hors Revit | 63 réussis, dont configuration, migration, états du panneau, contrôle de désinstallation et emplacement commun Revit 2027 |
 | Tests natifs Revit 0.6 | Non exécutés : les 2 tests natifs restent volontairement exclus |
+| Chargement natif du complément | Confirmé dans Revit 2027.2 : DLL chargée 0.6.0.0, démarrage API_SUCCESS, AddInLoadFailureMessage=NoError et bouton DreamsignMCPControl enregistré |
 | Rendu WPF | Inspecté : taille normale, taille minimale 600 × 600 et liste d’assistants ; palette rouge/noir/blanc et gris neutres |
 | États du panneau | Connexion désactivée avant sélection ou sans serveur ; clic explicite, profil choisi, liste déroulante et configuration avancée vérifiés |
 | Construction EXE/MSI | Réussie, sans avertissement ni suppression de contrôles MSI |
@@ -48,7 +49,20 @@ et par le refus explicite inscrit dans le journal de démarrage de Revit.
 
 Le diagnostic `ping_revit` rapporte aussi la version réellement chargée,
 l’enregistrement du panneau et `Application.AllUsersAddinsLocation`.
-La vérification finale du chargement de ce paquet reste en cours.
+Le paquet corrigé a ensuite passé le cycle complet de maintenance et le
+chargement réel dans Revit 2027.2, après confirmation manuelle du complément
+non signé. Le journal indique `API_SUCCESS`, la version d’assembly 0.6.0.0,
+`AddInLoadFailureMessage: NoError` et l’enregistrement du bouton
+`DreamsignMCPControl`. Les modules chargés confirment les mêmes chemins et
+versions. Un appel direct au bridge à l’accueil retourne `WRONG_DOCUMENT`,
+refus attendu en l’absence de projet actif : le bridge répond sans ouvrir ni
+modifier de modèle. Les deux tests natifs sur un modèle restent distincts et
+non exécutés.
+
+Les preuves du cycle final, les versions et les empreintes des cinq fichiers
+installés ainsi que le journal de chargement restent privés sous
+`.local/revit2027-lifecycle-20261016-133200`. L’ancien manifeste ProgramData
+est absent ; les 38 fichiers personnels contrôlés restent inchangés.
 
 La migration testée sauvegarde le manifeste reconnu, refuse un manifeste
 étranger ou une installation commune incomplète et conserve l’état de projet et

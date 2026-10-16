@@ -18,6 +18,7 @@ La dernière version publiée reste **[la version 0.5.0](https://github.com/Drea
 1. Lancez **Dreamsign_MCP_Setup_0.6.0.exe** et autorisez l’installation avec un compte administrateur. Le serveur et le complément sont installés une seule fois pour tous les utilisateurs du poste.
 2. Ouvrez ensuite Revit 2027 et votre assistant dans votre session Windows habituelle, sans droits administrateur.
 3. Si Revit était déjà ouvert, le nouveau complément sera disponible lors du prochain lancement de l’instance concernée.
+4. Le complément n’étant pas encore signé, Revit peut demander une confirmation de chargement. Vérifiez le nom **Dreamsign Revit MCP** et le chemin `Program Files\DreamsignRevitMCP\0.6.0\addin\Dreamsign.Revit.dll`, puis choisissez **Charger une fois** pour le premier essai.
 
 L’installateur contient les composants nécessaires : **aucune compilation n’est demandée aux utilisateurs**. Revit 2027 et votre assistant IA doivent déjà être installés. Le programme ne ferme aucune instance Revit automatiquement.
 
