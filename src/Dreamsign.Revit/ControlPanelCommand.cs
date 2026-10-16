@@ -28,6 +28,7 @@ namespace AstraRevitBridge
                     var store = new StateStore(directory);
                     if (File.Exists(store.StatePath)) target = store.Target;
                     bool same = valid && target != null && target.Document == document.Title &&
+                        (!target.Pid.HasValue || target.Pid.Value == Environment.ProcessId) &&
                         string.Equals(Path.GetFullPath(target.Path), Path.GetFullPath(path), StringComparison.OrdinalIgnoreCase);
                     var contact = App.LastContactUtc;
                     return new PanelState(document?.Title ?? "Aucun projet ouvert", path, target?.Document ?? "Aucun projet sélectionné",

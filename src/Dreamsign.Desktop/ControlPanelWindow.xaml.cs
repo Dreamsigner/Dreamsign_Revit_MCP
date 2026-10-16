@@ -23,12 +23,20 @@ public partial class ControlPanelWindow : Window
     private void Refresh()
     {
         state = read();
-        BridgeStatus.Text = "Bridge chargé · version " + ToolCatalog.Version;
+        BridgeStatus.Text = "Bridge chargé";
+        VersionText.Text = "Dreamsign MCP · " + ToolCatalog.Version;
         ActiveProjectText.Text = state.ActiveProject;
         ActivePathText.Text = state.ActivePath; ActivePathText.ToolTip = state.ActivePath;
         UseProjectButton.IsEnabled = state.CanSelect;
         UseProjectButton.ToolTip = state.CanSelect ? "Autoriser le MCP à utiliser ce projet." : "Ouvrez un projet et enregistrez-le au format RVT.";
         TargetText.Text = state.IsTarget ? "✓ Ce projet est la cible du MCP." : "Cible actuelle : " + state.TargetProject;
+        TargetBadgeText.Text = state.IsTarget ? "Projet autorisé" : "À sélectionner";
+        TargetBadge.Background = (System.Windows.Media.Brush)FindResource(state.IsTarget ? "AccentTint" : "Canvas");
+        TargetBadgeText.Foreground = (System.Windows.Media.Brush)FindResource(state.IsTarget ? "Accent" : "MutedInk");
+        ConnectButton.IsEnabled = state.IsTarget && state.ServerExecutable is not null;
+        ConnectButton.ToolTip = state.ServerExecutable is null ? "Le serveur est introuvable. Relancez l’installateur."
+            : !state.IsTarget ? "Choisissez d’abord le projet de travail." : "Sauvegarder et configurer cet assistant.";
+        System.Windows.Controls.ToolTipService.SetShowOnDisabled(ConnectButton, true);
         ContactText.Text = "Dernier contact : " + state.LastContact;
         StorageText.Text = "Dossier de configuration : " + state.DataDirectory;
     }
