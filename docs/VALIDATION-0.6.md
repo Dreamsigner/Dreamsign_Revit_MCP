@@ -28,6 +28,14 @@ les lecteurs d’écran, la haute résolution et le fonctionnement avec plusieur
 sessions Windows restent à vérifier manuellement. Aucune instance Revit n’a été
 fermée ou redémarrée et aucun modèle utilisateur n’a été modifié.
 
+Un premier contrôle GitHub a exposé une course dans l’ancien test de transport :
+son budget de 400 ms pouvait expirer avant connexion, alors que le test attendait
+un résultat inconnu après envoi. Le pair de test démarre désormais son attente
+directement et déclenche l’annulation après réception de la requête. Les
+assertions d’identité, de taille, de réponse incomplète et de résultat inconnu
+restent présentes ; aucun test n’a été désactivé. Le transport du produit n’a
+pas été modifié par cette correction de fixture.
+
 Le nouveau paquet est d’une portée différente de 0.5 : son extraction ne prouve
 pas que l’erreur 2203 du parcours automatisé est corrigée. Conserver les limites
 du [rapport 0.5](VALIDATION-0.5.md). Les binaires restent non signés.
