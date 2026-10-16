@@ -12,14 +12,14 @@
    <Custom Action="WaitForRevitExit" Before="InstallValidate" Condition="Installed AND REMOVE~=&quot;ALL&quot;"/>
   </InstallExecuteSequence>
   <Property Id="EXISTING_SHARED_MANIFEST">
-   <RegistrySearch Id="FindCommonDataRoot" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" Name="Common AppData" Type="directory" Bitness="always64">
+   <RegistrySearch Id="FindMachineProgramsRoot" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion" Name="ProgramFilesDir" Type="directory" Bitness="always64">
     <DirectorySearch Id="FindSharedManifestDirectory" Path="Autodesk\Revit\Addins\2027" Depth="0">
      <FileSearch Id="FindSharedManifest" Name="AstraRevitBridge.addin"/>
     </DirectorySearch>
    </RegistrySearch>
   </Property>
-  <Property Id="COMMON_DATA_SEARCH_ROOT"><RegistrySearchRef Id="FindCommonDataRoot"/></Property>
-  <Launch Condition="Installed OR COMMON_DATA_SEARCH_ROOT" Message="Le dossier de données commun Windows n’a pas pu être déterminé. Installation interrompue pour préserver les compléments existants."/>
+  <Property Id="MACHINE_PROGRAMS_SEARCH_ROOT"><RegistrySearchRef Id="FindMachineProgramsRoot"/></Property>
+  <Launch Condition="Installed OR MACHINE_PROGRAMS_SEARCH_ROOT" Message="Le dossier des programmes Windows n’a pas pu être déterminé. Installation interrompue pour préserver les compléments existants."/>
   <Launch Condition="Installed OR WIX_UPGRADE_DETECTED OR NOT EXISTING_SHARED_MANIFEST" Message="Un manifeste commun AstraRevitBridge.addin existe déjà. Faites vérifier son origine avant d’installer Dreamsign MCP ; aucun remplacement automatique n’est effectué."/>
   <StandardDirectory Id="ProgramFiles64Folder">
    <Directory Id="DreamsignPrograms" Name="DreamsignRevitMCP"><Directory Id="INSTALLFOLDER" Name="0.6.0">
@@ -53,11 +53,9 @@
      </Component>
     </Directory>
    </Directory></Directory>
-  </StandardDirectory>
-  <StandardDirectory Id="CommonAppDataFolder">
-   <Directory Id="AutodeskData" Name="Autodesk"><Directory Id="RevitData" Name="Revit">
+   <Directory Id="AutodeskPrograms" Name="Autodesk"><Directory Id="RevitPrograms" Name="Revit">
     <Directory Id="RevitAddins" Name="Addins"><Directory Id="Revit2027Addins" Name="2027">
-     <Component Id="SharedManifest" Guid="7121B2E8-EB72-40AD-8937-B9D2D43C2577">
+     <Component Id="SharedManifest" Guid="59DC39E6-B675-4997-90D1-5D9E67E0EFA1">
       <File Id="ManifestFile" Source="MachineManifest.xml" Name="AstraRevitBridge.addin" KeyPath="yes"/>
       <util:XmlFile Id="SetAssemblyPath" File="[#ManifestFile]" ElementPath="/RevitAddIns/AddIn/Assembly" Value="[#RevitAssembly]" Action="setValue" SelectionLanguage="XPath"/>
      </Component>

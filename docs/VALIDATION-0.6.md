@@ -7,7 +7,7 @@ sur le poste avec autorisation ; la version 0.6 reste installée à son issue.
 | Contrôle | Résultat |
 |---|---|
 | Compilation Release contre Revit 2027 local | Réussie, sans avertissement |
-| Tests hors Revit | 62 réussis, dont configuration, migration, états du panneau et contrôle de désinstallation |
+| Tests hors Revit | 63 réussis, dont configuration, migration, états du panneau, contrôle de désinstallation et emplacement commun Revit 2027 |
 | Tests natifs Revit 0.6 | Non exécutés : les 2 tests natifs restent volontairement exclus |
 | Rendu WPF | Inspecté : taille normale, taille minimale 600 × 600 et liste d’assistants ; palette rouge/noir/blanc et gris neutres |
 | États du panneau | Connexion désactivée avant sélection ou sans serveur ; clic explicite, profil choisi, liste déroulante et configuration avancée vérifiés |
@@ -21,6 +21,34 @@ sur le poste avec autorisation ; la version 0.6 reste installée à son issue.
 | Refus de désinstallation réelle avec Revit actif | Processus factice isolé nommé Revit : échec attendu 1603, installation et manifeste préservés, processus laissé ouvert par le contrôle |
 | État après réinstallation | 38 fichiers personnels inchangés, 5 binaires identiques au payload publié localement, manifeste commun restauré à l’identique |
 | Migration réelle de plusieurs comptes | Non exécutée ; tests sur fixtures isolées seulement |
+
+## Vérification du contenu et du chargement
+
+La vérification dans Revit a détecté deux défauts que le premier cycle de
+maintenance ne révélait pas : le paquet étiqueté 0.6 contenait encore les
+binaires 0.5 du dossier de publication, et le manifeste commun était placé
+sous ProgramData, emplacement ignoré par Revit 2027. Les premiers résultats
+de réparation/désinstallation et les comparaisons d’empreintes étaient valides
+pour ce paquet, mais ne prouvaient pas que le complément 0.6 était chargé.
+
+Le serveur et le complément ont été reconstruits et republiés ; les quatre
+binaires Dreamsign portent maintenant la version 0.6.0.0. La construction du
+MSI refuse désormais toute version divergente ou tout fichier manquant. Le
+rejet a été vérifié pour les quatre anciens fichiers et pour un payload 0.6
+présenté à une construction exigeant 0.5 ; le paquet correct compile sans
+avertissement. Le cycle de maintenance a aussi été rejoué après cette correction.
+
+Le MSI et la migration utilisent maintenant
+`%ProgramFiles%\Autodesk\Revit\Addins\2027`. Le composant du manifeste a un
+nouveau GUID, puisque son emplacement change. La recherche de conflits est
+vérifiée dans le MSI final : absence acceptée et manifeste étranger refusé
+sur une fixture isolée. Le changement d’emplacement est confirmé par le
+[SDK officiel Revit 2027](https://blog.autodesk.io/revit-2027-sdk-net-10-api-changes-and-additions/#add-in-installation-folder-changes)
+et par le refus explicite inscrit dans le journal de démarrage de Revit.
+
+Le diagnostic `ping_revit` rapporte aussi la version réellement chargée,
+l’enregistrement du panneau et `Application.AllUsersAddinsLocation`.
+La vérification finale du chargement de ce paquet reste en cours.
 
 La migration testée sauvegarde le manifeste reconnu, refuse un manifeste
 étranger ou une installation commune incomplète et conserve l’état de projet et

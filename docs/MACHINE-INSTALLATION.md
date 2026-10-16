@@ -9,7 +9,7 @@ sauvegardes jusqu’à validation sur un poste de test.
 | Emplacement | Usage | Droits requis |
 |---|---|---|
 | `%ProgramFiles%\DreamsignRevitMCP\0.6.0` | Serveur, complément et licences partagés | Administrateur pour installer, réparer ou désinstaller |
-| `%ProgramData%\Autodesk\Revit\Addins\2027\AstraRevitBridge.addin` | Enregistrement commun du complément | Administrateur pour modifier |
+| `%ProgramFiles%\Autodesk\Revit\Addins\2027\AstraRevitBridge.addin` | Enregistrement commun du complément | Administrateur pour modifier |
 | `HKLM\Software\Dreamsigner\RevitMCP` — vue 64 bits | Chemin du serveur commun et version | Lecture en usage normal, écriture par l’installation |
 | `%LOCALAPPDATA%\DreamsignRevitMCP` | Cible, correspondances, rapports, sauvegardes et journaux de cet utilisateur | Utilisateur courant |
 | Configuration de l’assistant | Connexion MCP individuelle | Utilisateur courant |
@@ -27,6 +27,10 @@ manifeste, avec support du rollback. Un manifeste commun préexistant bloque
 une première installation pour éviter son remplacement sans vérification.
 
 ## Chemin conseillé depuis 0.5
+
+Revit 2027 exige les manifestes communs sous `%ProgramFiles%\Autodesk\Revit\Addins\2027`
+et ignore l’ancien emplacement sous `ProgramData`. Le MSI et la migration
+utilisent ce même emplacement. Source : [changements officiels du SDK Revit 2027](https://blog.autodesk.io/revit-2027-sdk-net-10-api-changes-and-additions/#add-in-installation-folder-changes).
 
 ### Fermer Revit avant de désinstaller
 

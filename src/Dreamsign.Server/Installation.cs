@@ -10,6 +10,7 @@ public static class Installation
     public const string ManifestName = "AstraRevitBridge.addin";
     public const string AddInId = "82C55A6F-5AB5-4A4B-A8E0-4C0E4E6B08C1";
     public static string DefaultManifestDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Autodesk", "Revit", "Addins", "2027");
+    public static string MachineManifestDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Autodesk", "Revit", "Addins", "2027");
 
     public static JsonObject Install(string pluginDirectory, string manifestDirectory, string dataDirectory, bool replaceExisting = false)
     {

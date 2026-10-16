@@ -66,7 +66,7 @@ L’exécutable intègre serveur et runtime .NET. `addin` contient le plugin, Co
 dotnet build installer/Bundle/Dreamsign.Setup.wixproj -c Release
 ```
 
-Le résultat est `installer/Bundle/bin/Release/Dreamsign_MCP_Setup_0.6.0.exe`. Le bundle WiX/Burn 6.0.2 contient un MSI `perMachine` : fichiers sous `%ProgramFiles%/DreamsignRevitMCP/0.6.0`, registre HKLM en vue 64 bits et manifeste sous `%ProgramData%/Autodesk/Revit/Addins/2027`. L’action native WiX XmlFile renseigne le chemin absolu de la DLL ; le serveur n’est pas exécuté avec élévation pour enregistrer l’installation. L’installation machine ne lit aucun reçu personnel et ne modifie aucune configuration d’assistant.
+Le résultat est `installer/Bundle/bin/Release/Dreamsign_MCP_Setup_0.6.0.exe`. Le bundle WiX/Burn 6.0.2 contient un MSI `perMachine` : fichiers sous `%ProgramFiles%/DreamsignRevitMCP/0.6.0`, registre HKLM en vue 64 bits et manifeste sous `%ProgramFiles%/Autodesk/Revit/Addins/2027`. L’action native WiX XmlFile renseigne le chemin absolu de la DLL ; le serveur n’est pas exécuté avec élévation pour enregistrer l’installation. L’installation machine ne lit aucun reçu personnel et ne modifie aucune configuration d’assistant.
 
 Le gestionnaire de redémarrage est désactivé et les redémarrages forcés supprimés. `AllowLoadIntoExistingSession=false` reporte le chargement au prochain lancement volontaire de Revit. Les contrôles MSI restent actifs. L’UpgradeCode machine et celui du bundle sont distincts de la famille 0.5 par utilisateur : pas de suppression automatique des installations privées d’autres comptes. Pour une nouvelle version changeant les dossiers de composants, renouveler leurs GUID et ne pas modifier une release déjà publiée.
 
@@ -81,6 +81,17 @@ Sources : [WiX/Burn](https://docs.firegiant.com/wix/tools/burn/), [actions MSI](
 La CI Windows restaure les dépendances verrouillées, teste hors Revit et publie le **serveur seulement**. Elle ne valide pas le plugin dans Revit ; une distribution complète exige sa compilation locale.
 
 ## Données et compatibilité
+
+`installer/Package/ValidatePayload.targets` vérifie avant chaque compilation
+du MSI les versions de fichiers du serveur EXE et des trois DLL Dreamsign du
+dossier de publication. Un fichier manquant ou d’une autre version bloque la
+construction, même si le manifeste et les chemins sont corrects. Recompiler
+le plugin puis republier avec `IncludeRevitAddin=true` : reconstruire seulement
+le MSI ne renouvelle pas les binaires du dossier `artifacts/win-x64`.
+
+Le contrôle peut être exercé séparément avec `dotnet msbuild
+installer/Package/Dreamsign.Package.wixproj -t:ValidatePayloadVersion
+-p:Version=0.5.0` : un payload 0.6 doit alors être refusé pour les quatre fichiers.
 
 Le projet `installer/Guard` est une action MSI C# / WPF, empaquetée par DTF
 6.0.2 en DLL native 64 bits. Son hôte exige .NET Framework 4.8, fourni par

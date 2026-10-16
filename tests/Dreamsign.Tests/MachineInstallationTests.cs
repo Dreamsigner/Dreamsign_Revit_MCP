@@ -8,6 +8,12 @@ namespace Dreamsign.Tests;
 
 public sealed class MachineInstallationTests : IDisposable
 {
+    [Fact]
+    public void Revit2027MachineManifestIsUnderProgramFiles()
+    {
+        Assert.Equal(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Autodesk", "Revit", "Addins", "2027"), Installation.MachineManifestDirectory);
+        Assert.False(Installation.MachineManifestDirectory.StartsWith(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), StringComparison.OrdinalIgnoreCase));
+    }
     private readonly string directory = Path.Combine(Path.GetTempPath(), "Dreamsign_MCP_" + Guid.NewGuid().ToString("N"));
     public void Dispose() { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
     private string Exe(string folder)
