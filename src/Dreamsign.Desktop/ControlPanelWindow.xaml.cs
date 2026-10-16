@@ -17,6 +17,9 @@ public partial class ControlPanelWindow : Window
     {
         InitializeComponent(); this.read = read; this.select = select; this.connect = connect;
         Refresh();
+        if (!state.CanSelect) FeedbackText.Text = "Ouvrez un projet enregistré pour commencer.";
+        else if (state.ServerExecutable is null) FeedbackText.Text = "Le serveur installé est introuvable. Relancez l’installateur.";
+        else if (state.IsTarget) FeedbackText.Text = "Choisissez votre assistant, puis configurez la connexion.";
     }
     private string Profile => ProfileChoice.SelectedIndex switch { 0 => "inspection", 1 => "workflow", _ => "modeling" };
     private void ClosePanel(object sender, RoutedEventArgs args) => Close();
@@ -35,6 +38,8 @@ public partial class ControlPanelWindow : Window
         TargetBadge.Background = (System.Windows.Media.Brush)FindResource(state.IsTarget ? "AccentTint" : "Canvas");
         TargetBadgeText.Foreground = (System.Windows.Media.Brush)FindResource(state.IsTarget ? "Accent" : "MutedInk");
         ConnectButton.IsEnabled = state.IsTarget && state.ServerExecutable is not null;
+        UseProjectButton.Style = state.IsTarget ? (Style)FindResource(typeof(System.Windows.Controls.Button)) : (Style)FindResource("PrimaryButton");
+        ConnectButton.Style = state.IsTarget ? (Style)FindResource("PrimaryButton") : (Style)FindResource(typeof(System.Windows.Controls.Button));
         ConnectButton.ToolTip = state.ServerExecutable is null ? "Le serveur est introuvable. Relancez l’installateur."
             : !state.IsTarget ? "Choisissez d’abord le projet de travail." : "Sauvegarder et configurer cet assistant.";
         System.Windows.Controls.ToolTipService.SetShowOnDisabled(ConnectButton, true);
