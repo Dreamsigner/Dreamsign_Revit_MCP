@@ -1,7 +1,8 @@
 # Validation de la préparation 0.6
 
-Contrôles réalisés le 16 octobre 2026. Cette branche prépare une PR ; elle ne
-remplace pas la version 0.5 installée sur le poste.
+Contrôles réalisés le 16 octobre 2026. Cette branche prépare une PR et aucune
+release 0.6 n’est publiée. Le cycle automatisé de maintenance a été exécuté
+sur le poste avec autorisation ; la version 0.6 reste installée à son issue.
 
 | Contrôle | Résultat |
 |---|---|
@@ -16,7 +17,9 @@ remplace pas la version 0.5 installée sur le poste.
 | Inspection du MSI construit | ALLUSERS=1, registre HKLM, manifeste commun et chemin DLL formaté ; aucune action du serveur élevée |
 | Garde-fou de manifeste préexistant | Action AppSearch et conditions MSI vérifiées : racine système réelle détectée, copie à racine temporaire avec manifeste présent refusé et préservé, absence acceptée et racine inconnue refusée ; aucune écriture du registre de test |
 | Image administrative du MSI | Extraction réussie dans le dossier de contrôle ; aucun changement des manifestes actifs ou des processus Revit observés |
-| Installation/réparation/désinstallation commune sur le poste | Non exécutées ; validation sur une machine de test requise avant publication |
+| Installation/réparation/désinstallation commune sur le poste | Cycle réel via l’EXE en mode silencieux réussi : réparation 0, désinstallation 0, réinstallation 0 ; aucun redémarrage |
+| Refus de désinstallation réelle avec Revit actif | Processus factice isolé nommé Revit : échec attendu 1603, installation et manifeste préservés, processus laissé ouvert par le contrôle |
+| État après réinstallation | 38 fichiers personnels inchangés, 5 binaires identiques au payload publié localement, manifeste commun restauré à l’identique |
 | Migration réelle de plusieurs comptes | Non exécutée ; tests sur fixtures isolées seulement |
 
 La migration testée sauvegarde le manifeste reconnu, refuse un manifeste
@@ -35,9 +38,16 @@ Le contrôle de désinstallation précède `InstallValidate` (séquence 1399, pu
 native x64 et embarque sa configuration CLR v4. Le test d’inversion du blocage
 fait échouer le test WPF, puis les 62 tests repassent après restauration.
 L’appel isolé de l’action MSI ne lance pas les séquences d’installation ou de
-suppression. Le cycle complet EXE → MSI → fenêtre → annulation/reprise, ainsi
-que les sessions de plusieurs utilisateurs réels, restent à tester sur un poste
-isolé avant publication.
+suppression. Un second contrôle a ensuite exécuté les vraies opérations via
+l’EXE avec une seule autorisation administrateur. La réparation, le refus de
+désinstallation avec un processus factice, la désinstallation et la
+réinstallation ont été vérifiés par codes de sortie, registre, manifestes et
+empreintes des fichiers. Aucun computer use n’a été utilisé pour ce cycle.
+Les journaux complets restent privés sous `.local/lifecycle-20261016-130218`.
+
+Le parcours interactif EXE → MSI → fenêtre → annulation/reprise, ainsi que les
+sessions de plusieurs utilisateurs réels, restent à tester sur un poste isolé
+avant publication. Le succès du cycle silencieux ne valide pas ces parcours.
 
 Un premier contrôle GitHub a exposé une course dans l’ancien test de transport :
 son budget de 400 ms pouvait expirer avant connexion, alors que le test attendait
