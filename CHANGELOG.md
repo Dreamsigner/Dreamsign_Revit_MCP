@@ -1,6 +1,6 @@
 # Historique des changements
 
-## 0.6.0 — préversion du 18 octobre 2026
+## 0.6.0 — 18 octobre 2026
 
 ### Ajouts
 - Interface WPF rouge, noire et blanche, contrôles cohérents, footer visible et mise en page adaptable.

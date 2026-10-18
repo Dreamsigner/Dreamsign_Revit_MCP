@@ -7,11 +7,11 @@
 
 Dreamsign Revit MCP permet d’explorer un modèle, de créer des éléments et d’automatiser des tâches BIM dans **Revit 2027 sur Windows**. Il s’adresse aux architectes, équipes BIM et développeurs utilisant un assistant compatible MCP.
 
-## Version 0.6 — préversion disponible
+## Version 0.6 disponible
 
-**[Télécharger Dreamsign_MCP_Setup_0.6.0.exe](https://github.com/Dreamsigner/Dreamsign_Revit_MCP/releases/download/v0.6.0/Dreamsign_MCP_Setup_0.6.0.exe)** — Windows x64, Revit 2027. Voir les [notes de préversion](https://github.com/Dreamsigner/Dreamsign_Revit_MCP/releases/tag/v0.6.0) et les [empreintes SHA-256](https://github.com/Dreamsigner/Dreamsign_Revit_MCP/releases/download/v0.6.0/SHA256SUMS.txt).
+**[Télécharger Dreamsign_MCP_Setup_0.6.0.exe](https://github.com/Dreamsigner/Dreamsign_Revit_MCP/releases/download/v0.6.0/Dreamsign_MCP_Setup_0.6.0.exe)** — Windows x64, Revit 2027. Voir les [notes de version](https://github.com/Dreamsigner/Dreamsign_Revit_MCP/releases/tag/v0.6.0) et les [empreintes SHA-256](https://github.com/Dreamsigner/Dreamsign_Revit_MCP/releases/download/v0.6.0/SHA256SUMS.txt).
 
-La **0.6 est une préversion destinée aux essais**, avec une nouvelle interface et une installation commune à l’ordinateur. Les 63 tests hors Revit et les deux tests natifs sur un projet dédié réussissent ; les essais sur plusieurs comptes Windows sont confirmés par le mainteneur. Le parcours interactif complet de désinstallation reste à terminer ; les binaires ne sont pas signés. Consultez le [rapport de validation](docs/VALIDATION-0.6.md) avant installation. La dernière release stable reste **[la version 0.5.0](https://github.com/Dreamsigner/Dreamsign_Revit_MCP/releases/tag/v0.5.0)**, installée pour un seul utilisateur. Les étapes suivantes concernent la préversion 0.6.
+La **0.6.0 est la version courante**, avec une nouvelle interface et une installation commune à l’ordinateur. Les 63 tests hors Revit, les deux tests natifs sur un projet dédié et le cycle interactif de désinstallation/réinstallation réussissent ; les essais sur plusieurs comptes Windows sont confirmés par le mainteneur. Les binaires ne sont pas signés. Le [rapport de validation](docs/VALIDATION-0.6.md) détaille les contrôles réalisés et leurs limites. L’[ancienne version 0.5.0](https://github.com/Dreamsigner/Dreamsign_Revit_MCP/releases/tag/v0.5.0) reste disponible pour une installation par utilisateur.
 
 ## Installer la version 0.6
 
