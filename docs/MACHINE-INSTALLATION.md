@@ -1,8 +1,6 @@
 # Installation commune et migration depuis 0.5
 
-La version 0.6 est préparée pour revue, pas encore publiée ni validée en
-installation réelle pour tous les comptes. Conserver l’installateur 0.5 et les
-sauvegardes jusqu’à validation sur un poste de test.
+La version 0.6 est publiée en [préversion](https://github.com/Dreamsigner/Dreamsign_Revit_MCP/releases/tag/v0.6.0). Son installation commune a été testée sur le poste de développement ; les essais réels sur plusieurs comptes sont déclarés réussis par le mainteneur le 18 octobre 2026, sans journaux supplémentaires joints à ce rapport. Conserver l’installateur 0.5 et les sauvegardes, et commencer sur un poste de test. La 0.6 ne remplace pas automatiquement toutes les installations 0.5.
 
 ## Droits et séparation des données
 

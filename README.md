@@ -7,11 +7,11 @@
 
 Dreamsign Revit MCP permet d’explorer un modèle, de créer des éléments et d’automatiser des tâches BIM dans **Revit 2027 sur Windows**. Il s’adresse aux architectes, équipes BIM et développeurs utilisant un assistant compatible MCP.
 
-## Version en préparation
+## Version 0.6 — préversion disponible
 
-Cette branche prépare la **version 0.6**, avec une nouvelle interface et une installation commune à l’ordinateur. Son installateur n’est pas encore publié : voir le [rapport de validation](docs/VALIDATION-0.6.md).
+**[Télécharger Dreamsign_MCP_Setup_0.6.0.exe](https://github.com/Dreamsigner/Dreamsign_Revit_MCP/releases/download/v0.6.0/Dreamsign_MCP_Setup_0.6.0.exe)** — Windows x64, Revit 2027. Voir les [notes de préversion](https://github.com/Dreamsigner/Dreamsign_Revit_MCP/releases/tag/v0.6.0) et les [empreintes SHA-256](https://github.com/Dreamsigner/Dreamsign_Revit_MCP/releases/download/v0.6.0/SHA256SUMS.txt).
 
-La dernière version publiée reste **[la version 0.5.0](https://github.com/Dreamsigner/Dreamsign_Revit_MCP/releases/tag/v0.5.0)**, qui s’installe pour un seul utilisateur. Les étapes suivantes concernent la version 0.6.
+La **0.6 est une préversion destinée aux essais**, avec une nouvelle interface et une installation commune à l’ordinateur. Les 63 tests hors Revit et les deux tests natifs sur un projet dédié réussissent ; les essais sur plusieurs comptes Windows sont confirmés par le mainteneur. Le parcours interactif complet de désinstallation reste à terminer ; les binaires ne sont pas signés. Consultez le [rapport de validation](docs/VALIDATION-0.6.md) avant installation. La dernière release stable reste **[la version 0.5.0](https://github.com/Dreamsigner/Dreamsign_Revit_MCP/releases/tag/v0.5.0)**, installée pour un seul utilisateur. Les étapes suivantes concernent la préversion 0.6.
 
 ## Installer la version 0.6
 

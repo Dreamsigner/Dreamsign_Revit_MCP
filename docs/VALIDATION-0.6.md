@@ -1,14 +1,12 @@
 # Validation de la préparation 0.6
 
-Contrôles réalisés le 16 octobre 2026. Cette branche prépare une PR et aucune
-release 0.6 n’est publiée. Le cycle automatisé de maintenance a été exécuté
-sur le poste avec autorisation ; la version 0.6 reste installée à son issue.
+Contrôles principaux réalisés le 16 octobre 2026 ; préparation de la préversion publique le 18 octobre 2026. Le cycle automatisé de maintenance a été exécuté sur le poste avec autorisation ; la version 0.6 reste installée à son issue. La préversion conserve les limites détaillées ci-dessous.
 
 | Contrôle | Résultat |
 |---|---|
 | Compilation Release contre Revit 2027 local | Réussie, sans avertissement |
 | Tests hors Revit | 63 réussis, dont configuration, migration, états du panneau, contrôle de désinstallation et emplacement commun Revit 2027 |
-| Tests natifs Revit 0.6 | Non exécutés : les 2 tests natifs restent volontairement exclus |
+| Tests natifs Revit 0.6 | 2 réussis le 18 octobre sur Dreamsign_MCP_Release_20261018, avec serveur installé 0.6, état isolé et complément 0.6 réellement chargé |
 | Chargement natif du complément | Confirmé dans Revit 2027.2 : DLL chargée 0.6.0.0, démarrage API_SUCCESS, AddInLoadFailureMessage=NoError et bouton DreamsignMCPControl enregistré |
 | Rendu WPF | Inspecté : taille normale, taille minimale 600 × 600 et liste d’assistants ; palette rouge/noir/blanc et gris neutres |
 | États du panneau | Connexion désactivée avant sélection ou sans serveur ; clic explicite, profil choisi, liste déroulante et configuration avancée vérifiés |
@@ -21,7 +19,7 @@ sur le poste avec autorisation ; la version 0.6 reste installée à son issue.
 | Installation/réparation/désinstallation commune sur le poste | Cycle réel via l’EXE en mode silencieux réussi : réparation 0, désinstallation 0, réinstallation 0 ; aucun redémarrage |
 | Refus de désinstallation réelle avec Revit actif | Processus factice isolé nommé Revit : échec attendu 1603, installation et manifeste préservés, processus laissé ouvert par le contrôle |
 | État après réinstallation | 38 fichiers personnels inchangés, 5 binaires identiques au payload publié localement, manifeste commun restauré à l’identique |
-| Migration réelle de plusieurs comptes | Non exécutée ; tests sur fixtures isolées seulement |
+| Migration réelle de plusieurs comptes | Déclarée réussie par le mainteneur le 18 octobre ; non rejouée par l’agent et sans journaux supplémentaires fournis |
 
 ## Vérification du contenu et du chargement
 
@@ -56,8 +54,7 @@ non signé. Le journal indique `API_SUCCESS`, la version d’assembly 0.6.0.0,
 `DreamsignMCPControl`. Les modules chargés confirment les mêmes chemins et
 versions. Un appel direct au bridge à l’accueil retourne `WRONG_DOCUMENT`,
 refus attendu en l’absence de projet actif : le bridge répond sans ouvrir ni
-modifier de modèle. Les deux tests natifs sur un modèle restent distincts et
-non exécutés.
+modifier de modèle. Les deux tests natifs sur un modèle ont ensuite été exécutés et réussis le 18 octobre sur un projet dédié, sans modèle utilisateur.
 
 Les preuves du cycle final, les versions et les empreintes des cinq fichiers
 installés ainsi que le journal de chargement restent privés sous
@@ -70,9 +67,7 @@ les fichiers clients. Le serveur commun est prioritaire sur un ancien reçu
 personnel ; une installation personnelle valide reste utilisable en repli.
 
 Les captures proviennent du vrai panneau WPF exécuté dans le processus de test,
-pas d’une maquette HTML. Le clic sur le ruban Revit, le parcours clavier complet,
-les lecteurs d’écran, la haute résolution et le fonctionnement avec plusieurs
-sessions Windows restent à vérifier manuellement. Aucune instance Revit n’a été
+pas d’une maquette HTML. Le clic sur le ruban Revit, le parcours clavier complet, les lecteurs d’écran et la haute résolution restent à vérifier manuellement. Les essais sur plusieurs comptes Windows sont déclarés réussis par le mainteneur le 18 octobre. Aucune instance Revit n’a été
 fermée ou redémarrée et aucun modèle utilisateur n’a été modifié.
 
 Le contrôle de désinstallation précède `InstallValidate` (séquence 1399, puis
@@ -87,9 +82,8 @@ réinstallation ont été vérifiés par codes de sortie, registre, manifestes e
 empreintes des fichiers. Aucun computer use n’a été utilisé pour ce cycle.
 Les journaux complets restent privés sous `.local/lifecycle-20261016-130218`.
 
-Le parcours interactif EXE → MSI → fenêtre → annulation/reprise, ainsi que les
-sessions de plusieurs utilisateurs réels, restent à tester sur un poste isolé
-avant publication. Le succès du cycle silencieux ne valide pas ces parcours.
+Le parcours interactif EXE → MSI → fenêtre → annulation/reprise, reste à tester sur un poste isolé
+avant une publication stable. Le succès du cycle silencieux ne valide pas ces parcours.
 
 Un premier contrôle GitHub a exposé une course dans l’ancien test de transport :
 son budget de 400 ms pouvait expirer avant connexion, alors que le test attendait
@@ -103,7 +97,21 @@ Le nouveau paquet est d’une portée différente de 0.5 : son extraction ne pro
 pas que l’erreur 2203 du parcours automatisé est corrigée. Conserver les limites
 du [rapport 0.5](VALIDATION-0.5.md). Les binaires restent non signés.
 
-Avant une release : tester le cycle complet sur un poste isolé avec un compte
+Avant une release stable : tester le cycle complet sur un poste isolé avec un compte
 administrateur et deux utilisateurs ordinaires, y compris un ancien manifeste
 utilisateur, un manifeste commun étranger et le rollback. Vérifier que chacun
 garde ses propres projets, réglages et journaux.
+
+## Préversion du 18 octobre 2026
+
+- Les tests hors Revit ont été rejoués sur le code fusionné : 63 réussis, aucun échec. Les deux tests natifs ont ensuite été activés séparément et réussis : 65 réussites au total.
+- L’EXE publié est celui du cycle de maintenance et du chargement Revit validés le 16 octobre. Son SHA-256 est `0a608971719cb3bb646eda0e4b6f259b6e742897b41e39ee1c827a98c15866dc` (30 099 843 octets).
+- Sa source de construction est le commit `e4e989f5e91e8eef1d9302f502b25223b8fcaab1`. La comparaison avec le code fusionné `16b5b94da4c8f880233e73d2d1baa74f9dbbd612` ne montre que des modifications de README et de rapport de validation, aucune modification applicative. La préparation de publication ne change également que la documentation.
+- Le fichier `provenance.json` joint à la release identifie le commit de publication, la source de construction, l’empreinte et les contrôles réalisés. Aucun journal privé ni modèle n’est joint.
+- Cette publication est marquée **préversion**, conserve 0.5.0 comme dernière release stable et ne prétend pas valider les parcours encore manquants ni résoudre rétrospectivement l’erreur 2203 de 0.5.
+
+### Complément de validation native et multi-comptes
+
+Le 18 octobre, le mainteneur a confirmé la réussite des essais sur plusieurs comptes Windows. Cette déclaration est distinguée des essais exécutés par l’agent ; aucun journal de ces essais multi-comptes n’a été fourni.
+
+Une nouvelle instance Revit a ouvert un projet enregistré `Dreamsign_MCP_Release_20261018`, créé depuis le gabarit métrique architectural. Les deux tests `LiveRevitTests` passent : lecture du document et des niveaux par le serveur MCP installé ; création d’un niveau temporaire, prévisualisation et application, invalidation de capture, refus de rejouer le plan, comparaison des captures et suppression du seul niveau créé. L’état MCP est isolé du ciblage habituel. Le test ne sauvegarde pas les changements et aucune instance existante n’a été fermée. Les résultats TRX restent privés dans `.local/release-0.6-validation`.
