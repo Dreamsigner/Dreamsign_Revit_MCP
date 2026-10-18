@@ -11,7 +11,8 @@ public static class UserMigration
 {
     public static void RequireStandardUser()
     {
-        if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException("Windows est requis.");
+        if (!OperatingSystem.IsWindows())
+            throw new PlatformNotSupportedException("Windows est requis.");
         using var identity = WindowsIdentity.GetCurrent();
         if (identity.IsSystem || new WindowsPrincipal(identity).IsInRole(WindowsBuiltInRole.Administrator))
             throw new InvalidOperationException("Lancez la migration depuis votre session habituelle, sans exécuter en tant qu’administrateur.");
@@ -30,14 +31,28 @@ public static class UserMigration
         }
         using var lease = new StateStore(data).AcquireLease();
         var manifest = Path.Combine(userManifests, Installation.ManifestName);
-        if (!File.Exists(manifest)) return new() { ["success"] = true, ["migrated"] = false };
-        if (!Installation.IsOwned(manifest, true)) throw new InvalidOperationException("Le manifeste utilisateur n’appartient pas à cette installation C# ; aucun remplacement effectué.");
-        var backups = Path.Combine(data, "backups"); Directory.CreateDirectory(backups);
+        if (!File.Exists(manifest))
+            return new()
+            {
+                ["success"] = true,
+                ["migrated"] = false
+            };
+        if (!Installation.IsOwned(manifest, true))
+            throw new InvalidOperationException("Le manifeste utilisateur n’appartient pas à cette installation C# ; aucun remplacement effectué.");
+        var backups = Path.Combine(data, "backups");
+        Directory.CreateDirectory(backups);
         var backup = Path.Combine(backups, "Dreamsign_MCP_" + Guid.NewGuid().ToString("N") + ".addin");
         File.Copy(manifest, backup);
-        if (!File.ReadAllBytes(manifest).SequenceEqual(File.ReadAllBytes(backup))) throw new IOException("Le manifeste a changé pendant la migration ; il est conservé.");
+        if (!File.ReadAllBytes(manifest).SequenceEqual(File.ReadAllBytes(backup)))
+            throw new IOException("Le manifeste a changé pendant la migration ; il est conservé.");
         File.Delete(manifest);
-        return new() { ["success"] = true, ["migrated"] = true, ["backup"] = backup, ["restart_required"] = true,
-            ["next_step"] = "Au prochain lancement de Revit, ouvrez Dreamsign MCP et configurez votre assistant. Aucun projet ni réglage client n’a été modifié." };
+        return new()
+        {
+            ["success"] = true,
+            ["migrated"] = true,
+            ["backup"] = backup,
+            ["restart_required"] = true,
+            ["next_step"] = "Au prochain lancement de Revit, ouvrez Dreamsign MCP et configurez votre assistant. Aucun projet ni réglage client n’a été modifié."
+        };
     }
 }

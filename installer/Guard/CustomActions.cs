@@ -11,7 +11,8 @@ public static class CustomActions
         try
         {
             var snapshot = RevitSessions.Scan();
-            if (snapshot.CanContinue) return ActionResult.Success;
+            if (snapshot.CanContinue)
+                return ActionResult.Success;
             if (!RevitSessions.CanShowWindow(session["DREAMSIGN_BUNDLE_DISPLAY"], session["UILevel"], Environment.UserInteractive))
             {
                 using (var message = new Record(1))
@@ -26,12 +27,19 @@ public static class CustomActions
             Exception? failure = null;
             var thread = new Thread(() =>
             {
-                try { allowed = new RevitSessionsWindow(RevitSessions.Scan).ShowDialog() == true; }
+                try
+                {
+                    allowed = new RevitSessionsWindow(RevitSessions.Scan).ShowDialog() == true;
+                }
                 catch (Exception error) { failure = error; }
             });
-            thread.SetApartmentState(ApartmentState.STA); thread.Start(); thread.Join();
-            if (failure != null) throw failure;
-            if (!allowed) return ActionResult.UserExit;
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            thread.Join();
+            if (failure != null)
+                throw failure;
+            if (!allowed)
+                return ActionResult.UserExit;
             // Recheck after the dialog exits; never rely on the last timer tick.
             return RevitSessions.Scan().CanContinue ? ActionResult.Success : ActionResult.Failure;
         }

@@ -1,19 +1,46 @@
 name: Tests
+
 on: [push, pull_request]
+
 permissions:
   contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   offline:
     runs-on: windows-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           global-json-file: global.json
-      - run: dotnet restore tests/Dreamsign.Tests/Dreamsign.Tests.csproj --locked-mode
-      - run: dotnet test tests/Dreamsign.Tests/Dreamsign.Tests.csproj -c Release --no-restore --logger trx
-      - run: dotnet publish src/Dreamsign.Server/Dreamsign.Server.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:RestoreLockedMode=true -o artifacts/server-only
-      - uses: actions/upload-artifact@v4
+          cache: true
+          cache-dependency-path: '**/packages*.lock.json'
+      - name: Verify C# formatting
+        shell: pwsh
+        run: |
+          $sources = git ls-files '*.cs'
+          dotnet format whitespace --folder --include $sources --verify-no-changes
+      - name: Restore locked dependencies and audit packages
+        run: dotnet restore tests/Dreamsign.Tests/Dreamsign.Tests.csproj --locked-mode -p:NuGetAudit=true -p:NuGetAuditMode=all -p:TreatWarningsAsErrors=true
+      - name: Run offline tests
+        run: dotnet test tests/Dreamsign.Tests/Dreamsign.Tests.csproj -c Release --no-restore -p:TreatWarningsAsErrors=true --logger trx --results-directory TestResults
+      - name: Retain test results
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-results
+          path: TestResults/*.trx
+          if-no-files-found: ignore
+      - name: Publish standalone server
+        run: dotnet publish src/Dreamsign.Server/Dreamsign.Server.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:RestoreLockedMode=true -p:TreatWarningsAsErrors=true -o artifacts/server-only
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: dreamsign-server-only-win-x64
           path: artifacts/server-only

@@ -1,28 +1,15 @@
-# Parcours utilisateur 0.5 — périmètre adopté
+# Décision historique : panneau Revit et installateur (0.5)
 
-Les choix suivants ont été approuvés dans la discussion, puis leur mise en œuvre groupée a été demandée.
+La version 0.5 a introduit le panneau **Compléments → Dreamsign MCP** et un
+installateur EXE par utilisateur. Le panneau rend explicites trois opérations :
+autoriser le projet actif enregistré, choisir l’assistant, puis configurer la connexion.
 
-| Module | Résultat attendu | Dépendance |
-|---|---|---|
-| configuration | État partagé, ciblage explicite et configurations des clients sauvegardées | Contracts |
-| interface | Fenêtre WPF depuis Compléments : projet, sélection en un clic, état et connexion d’un assistant | configuration |
-| installation | Un EXE Windows, installation utilisateur, mise à jour et désinstallation standard | serveur, interface, plugin |
-| documentation | Installation prête à l’emploi en premier ; compilation dans la documentation développeur | installation |
+Le choix du projet n’est jamais déduit d’un changement d’onglet. La configuration
+partage le même verrou d’état que le serveur, sauvegarde les fichiers modifiés
+et préserve les autres entrées MCP. Le statut distingue complément chargé,
+projet ciblé et dernier contact ; il ne prétend pas prouver une connexion permanente.
 
-Ordre : configuration → interface → installation → tests et publication. Toute la logique applicative reste en C# ; WPF/XAML décrit la fenêtre et WiX décrit le paquet d’installation Windows.
-
-## Contraintes vérifiables
-
-- L’interface cible uniquement le document actif enregistré et non familial. Aucun basculement automatique de cible, aucune fermeture d’instance, aucune sauvegarde automatique de modèle.
-- Le même verrou et le même fichier d’état sont utilisés par serveur et interface. Changer de projet sauvegarde les anciennes correspondances.
-- La connexion à un assistant est une action explicite ; sauvegarde avant modification, conservation des réglages des autres serveurs, refus d’écraser une entrée étrangère.
-- Le statut distingue plugin chargé, projet ciblé et dernier contact. Il ne déduit pas une connexion permanente de la simple présence d’un pipe.
-- L’installateur est un bundle WiX/Burn contenant un MSI utilisateur et le serveur autonome. Windows gère ses fichiers et la désinstallation. Les compléments existants et les modèles sont conservés ; le gestionnaire de redémarrage ne ferme pas Revit.
-- Les noms générés et projets de test utilisent `Dreamsign_MCP_`. Les fichiers existants ne sont pas renommés. Les identifiants techniques historiques conservés pour compatibilité ne désignent pas des projets de test.
-- La documentation s’adresse aux utilisateurs : installer, ouvrir Revit, utiliser Compléments, choisir le projet et connecter l’assistant. La phrase signalée sur Node.js/PowerShell est supprimée.
-
-## Validation
-
-Tests des configurations et restaurations, tests de fenêtre WPF avec rendu, compilation contre Revit 2027, construction et inspection de l’EXE/MSI, installation/réparation/désinstallation contrôlées et tests natifs sur un projet dédié quand disponible. Les preuves locales et fichiers privés restent hors Git.
-
-Sources d’implémentation : documentation Autodesk Revit 2027, Microsoft WPF et Windows Installer, WiX/Burn 6.0.2. Aucun certificat de signature ni identifiant d’éditeur n’est inventé.
+L’installation par utilisateur a ensuite été remplacée par l’installation commune
+de 0.6, avec paramètres individuels. Pour le fonctionnement actuel, consulter le
+[README](../README.md), le [guide de migration](MACHINE-INSTALLATION.md) et les
+[résultats historiques 0.5](VALIDATION-0.5.md).

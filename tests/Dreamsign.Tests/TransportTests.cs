@@ -18,7 +18,8 @@ public sealed class TransportTests
     [InlineData("cancel_after_send", "TIMEOUT_OUTCOME_UNKNOWN")]
     public async Task PipeProtocolChecksIdentitySizeEofAndCancellation(string mode, string? expected)
     {
-        if (!OperatingSystem.IsWindows()) return;
+        if (!OperatingSystem.IsWindows())
+            return;
         var pid = Random.Shared.Next(1500000000, 1900000000);
         using var pipe = new NamedPipeServerStream(ToolCatalog.PipePrefix + pid, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
         Assert.Contains(pid, new NamedPipeTransport().EnumeratePids());
@@ -30,19 +31,32 @@ public sealed class TransportTests
             var request = JsonNode.Parse((await reader.ReadLineAsync(deadline.Token))!)!;
             Assert.Equal("get_active_document", request["operation"]!.ToString());
             // Cancel only after receipt: a slow CI startup must not turn this into a pre-send timeout.
-            if (mode == "cancel_after_send") { deadline.Cancel(); return; }
-            if (mode == "eof") { pipe.Disconnect(); return; }
+            if (mode == "cancel_after_send")
+            {
+                deadline.Cancel();
+                return;
+            }
+            if (mode == "eof")
+            {
+                pipe.Disconnect();
+                return;
+            }
             var response = mode == "null" ? "null\n" : mode == "oversize" ? new string(' ', ToolCatalog.ResponseBytes + 1) + "\n"
                 : new JsonObject { ["success"] = true, ["request_id"] = mode == "wrong_id" ? "other" : request["request_id"]!.ToString() }.ToJsonString() + "\n";
-            try { await pipe.WriteAsync(Encoding.UTF8.GetBytes(response), deadline.Token); }
+            try
+            {
+                await pipe.WriteAsync(Encoding.UTF8.GetBytes(response), deadline.Token);
+            }
             catch (IOException) when (mode == "oversize") { } // Client closes after the limit.
         }
         var server = Serve();
         var result = await new NamedPipeTransport(TimeSpan.FromSeconds(5))
             .SendAsync("get_active_document", new(), new("Example", @"C:\Example.rvt", pid), deadline.Token);
         await server;
-        if (expected is null) Assert.True(result["success"]!.GetValue<bool>());
-        else Assert.Equal(expected, result["code"]!.GetValue<string>());
+        if (expected is null)
+            Assert.True(result["success"]!.GetValue<bool>());
+        else
+            Assert.Equal(expected, result["code"]!.GetValue<string>());
     }
 
     [Fact]

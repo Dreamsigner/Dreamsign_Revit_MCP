@@ -26,15 +26,24 @@ public sealed class DesktopTests
                         serverInstalled ? @"C:\Tools\Dreamsign.Revit.Mcp.exe" : null),
                     () => throw new InvalidOperationException("Selection must remain explicit"),
                     (_, _) => throw new InvalidOperationException("Connection must remain disabled"));
-                window.Left = -10000; window.Top = -10000; window.WindowStartupLocation = WindowStartupLocation.Manual;
-                window.ShowInTaskbar = false; window.ShowActivated = false;
-                try { window.Show(); window.UpdateLayout(); Assert.False(FindButton(window, "Configurer la connexion").IsEnabled); }
+                window.Left = -10000;
+                window.Top = -10000;
+                window.WindowStartupLocation = WindowStartupLocation.Manual;
+                window.ShowInTaskbar = false;
+                window.ShowActivated = false;
+                try
+                {
+                    window.Show();
+                    window.UpdateLayout();
+                    Assert.False(FindButton(window, "Configurer la connexion").IsEnabled);
+                }
                 finally { window.Close(); window.Dispatcher.InvokeShutdown(); }
             }
             catch (Exception error) { failure = error; }
         });
         thread.IsBackground = true;
-        thread.SetApartmentState(ApartmentState.STA); thread.Start();
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
         Assert.True(thread.Join(TimeSpan.FromSeconds(20)), "WPF test timed out");
         Assert.Null(failure);
     }
@@ -47,62 +56,81 @@ public sealed class DesktopTests
         {
             try
             {
-                bool selected=false, connected=false;
+                bool selected = false, connected = false;
                 var window = new ControlPanelWindow(
-                    ()=>new("Projet exemple", @"C:\Projects\Exemple.rvt",selected ? "Projet exemple" : "Aucun projet sélectionné",true,selected,
+                    () => new("Projet exemple", @"C:\Projects\Exemple.rvt", selected ? "Projet exemple" : "Aucun projet sélectionné", true, selected,
                         "Aucun échange reçu", @"C:\Users\Utilisateur\AppData\Local\DreamsignRevitMCP", @"C:\Tools\Dreamsign.Revit.Mcp.exe"),
-                    ()=>selected=true,
-                    (client,profile)=>{ Assert.Equal(DesktopClient.Cursor,client); Assert.Equal("modeling",profile); connected=true; });
-                window.Left=-10000; window.Top=-10000; window.WindowStartupLocation=WindowStartupLocation.Manual;
-                window.ShowInTaskbar=false; window.ShowActivated=false;
+                    () => selected = true,
+                    (client, profile) => { Assert.Equal(DesktopClient.Cursor, client); Assert.Equal("modeling", profile); connected = true; });
+                window.Left = -10000;
+                window.Top = -10000;
+                window.WindowStartupLocation = WindowStartupLocation.Manual;
+                window.ShowInTaskbar = false;
+                window.ShowActivated = false;
                 try
                 {
-                    window.Show(); window.UpdateLayout();
-                    Assert.False(selected); Assert.False(connected);
-                    var preview=Environment.GetEnvironmentVariable("DREAMSIGN_UI_PREVIEW");
-                    if(preview is not null)
+                    window.Show();
+                    window.UpdateLayout();
+                    Assert.False(selected);
+                    Assert.False(connected);
+                    var preview = Environment.GetEnvironmentVariable("DREAMSIGN_UI_PREVIEW");
+                    if (preview is not null)
                     {
                         Capture(window, preview);
                     }
-                    var button=(Button)window.FindName("UseProjectButton");
-                    Assert.True(button.IsEnabled); button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                    var button = (Button)window.FindName("UseProjectButton");
+                    Assert.True(button.IsEnabled);
+                    button.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                     Assert.True(selected);
-                    Assert.Contains("Ce projet est la cible",((TextBlock)window.FindName("TargetText")).Text);
+                    Assert.Contains("Ce projet est la cible", ((TextBlock)window.FindName("TargetText")).Text);
                     var choice = (ComboBox)window.FindName("ClientChoice");
-                    choice.SelectedIndex = 2; choice.IsDropDownOpen = true; window.UpdateLayout();
+                    choice.SelectedIndex = 2;
+                    choice.IsDropDownOpen = true;
+                    window.UpdateLayout();
                     var popup = (System.Windows.Controls.Primitives.Popup)choice.Template.FindName("PART_Popup", choice);
                     Assert.True(popup.IsOpen);
                     Assert.True(popup.Child.RenderSize.Width >= choice.ActualWidth);
-                    if (preview is not null) Capture(window, Path.ChangeExtension(preview, ".dropdown.png"), (FrameworkElement)popup.Child);
+                    if (preview is not null)
+                        Capture(window, Path.ChangeExtension(preview, ".dropdown.png"), (FrameworkElement)popup.Child);
                     choice.IsDropDownOpen = false;
-                    var connect=FindButton(window,"Configurer la connexion");
+                    var connect = FindButton(window, "Configurer la connexion");
                     Assert.True(connect.IsEnabled);
-                    connect.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); Assert.True(connected);
+                    connect.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                    Assert.True(connected);
                     if (preview is not null)
                     {
                         Capture(window, Path.ChangeExtension(preview, ".ready.png"));
-                        window.Width = 600; window.Height = 600; window.UpdateLayout();
+                        window.Width = 600;
+                        window.Height = 600;
+                        window.UpdateLayout();
                         Assert.True(FindButton(window, "Terminer").IsVisible);
                         Capture(window, Path.ChangeExtension(preview, ".compact.png"));
-                        ((Expander)window.FindName("AdvancedSettings")).IsExpanded = true; window.UpdateLayout();
+                        ((Expander)window.FindName("AdvancedSettings")).IsExpanded = true;
+                        window.UpdateLayout();
                         Assert.True(FindButton(window, "Copier la configuration pour un autre client").IsVisible);
                     }
                 }
                 finally { window.Close(); window.Dispatcher.InvokeShutdown(); }
             }
-            catch(Exception error){failure=error;}
+            catch (Exception error) { failure = error; }
         });
-        thread.SetApartmentState(ApartmentState.STA); thread.Start();
-        Assert.True(thread.Join(TimeSpan.FromSeconds(20)),"WPF test timed out");
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        Assert.True(thread.Join(TimeSpan.FromSeconds(20)), "WPF test timed out");
         Assert.Null(failure);
     }
-    private static Button FindButton(DependencyObject root,string label)
+    private static Button FindButton(DependencyObject root, string label)
     {
-        for(int i=0;i<VisualTreeHelper.GetChildrenCount(root);i++)
+        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
         {
-            var child=VisualTreeHelper.GetChild(root,i);
-            if(child is Button button && button.Content?.ToString()==label)return button;
-            try{return FindButton(child,label);}catch(InvalidOperationException){}
+            var child = VisualTreeHelper.GetChild(root, i);
+            if (child is Button button && button.Content?.ToString() == label)
+                return button;
+            try
+            {
+                return FindButton(child, label);
+            }
+            catch (InvalidOperationException) { }
         }
         throw new InvalidOperationException("Button not found");
     }
@@ -112,7 +140,9 @@ public sealed class DesktopTests
         content.UpdateLayout();
         var bitmap = new RenderTargetBitmap((int)content.ActualWidth, (int)content.ActualHeight, 96, 96, PixelFormats.Pbgra32);
         bitmap.Render(content);
-        var encoder = new PngBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(bitmap));
-        using var stream = File.Create(path); encoder.Save(stream);
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(bitmap));
+        using var stream = File.Create(path);
+        encoder.Save(stream);
     }
 }
