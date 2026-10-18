@@ -1,6 +1,6 @@
 # Installation commune et migration depuis 0.5
 
-La version 0.6 est disponible dans la [release 0.6.0](https://github.com/Dreamsigner/Dreamsign_Revit_MCP/releases/tag/v0.6.0). Son installation commune a été testée sur le poste de développement ; les essais réels sur plusieurs comptes sont déclarés réussis par le mainteneur le 18 octobre 2026, sans journaux supplémentaires joints à ce rapport. Conserver l’installateur 0.5 et les sauvegardes, et commencer sur un poste de test. La 0.6 ne remplace pas automatiquement toutes les installations 0.5.
+Ce guide décrit l’installation commune de la version 0.6 et la migration depuis 0.5. Les installateurs disponibles sont ceux des [Releases](https://github.com/Dreamsigner/Dreamsign_Revit_MCP/releases). Conserver l’ancien installateur et les sauvegardes pendant la migration. La 0.6 ne retire pas automatiquement les installations privées des autres comptes.
 
 ## Droits et séparation des données
 
