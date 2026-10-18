@@ -7,6 +7,6 @@
   <Page Include="../../src/Dreamsign.Desktop/PanelTheme.xaml" Link="PanelTheme.xaml"/>
   <Content Include="CustomAction.config"/>
   <PackageReference Include="WixToolset.Dtf.CustomAction" Version="6.0.2"/>
-  <PackageReference Include="WixToolset.Dtf.WindowsInstaller" Version="6.0.2"/>
+  <PackageReference Include="WixToolset.Dtf.WindowsInstaller" Version="7.0.0"/>
  </ItemGroup>
 </Project>
