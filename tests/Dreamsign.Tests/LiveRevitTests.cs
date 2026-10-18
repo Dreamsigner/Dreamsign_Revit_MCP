@@ -31,9 +31,11 @@ public sealed class LiveRevitTests
         var transport = new StdioClientTransport(new()
         {
             Name = "Dreamsign native integration",
-            Command = Path.GetFileName(executable), WorkingDirectory = Path.GetDirectoryName(executable),
+            Command = Path.GetFileName(executable),
+            WorkingDirectory = Path.GetDirectoryName(executable),
             Arguments = ["serve", "--profile", "inspection", "--data-dir", data],
-            InheritEnvironmentVariables = false, EnvironmentVariables = StdioClientTransportOptions.GetDefaultEnvironmentVariables()
+            InheritEnvironmentVariables = false,
+            EnvironmentVariables = StdioClientTransportOptions.GetDefaultEnvironmentVariables()
         });
         await using var client = await McpClient.CreateAsync(transport, cancellationToken: deadline.Token);
         var response = await client.CallToolAsync("get_active_document", cancellationToken: deadline.Token);
@@ -59,7 +61,8 @@ public sealed class LiveRevitTests
         var runtime = new BridgeRuntime(store, new NamedPipeTransport(), "full");
         async Task<JsonObject> Call(string op, JsonObject args)
         {
-            if (ToolCatalog.Get(op).Schema["properties"]?["response_mode"] is not null) args["response_mode"] = "full";
+            if (ToolCatalog.Get(op).Schema["properties"]?["response_mode"] is not null)
+                args["response_mode"] = "full";
             return await runtime.HandleAsync(op, args);
         }
         var document = await Call("get_active_document", new());
@@ -70,23 +73,54 @@ public sealed class LiveRevitTests
         string? uid = null;
         try
         {
-            var created = await Call("create_elements", new() { ["document_token"] = token,
-                ["spec"] = new JsonArray(new JsonObject { ["kind"] = "level", ["source_id"] = source, ["name"] = source, ["elevation_m"] = 321.123 }) });
+            var created = await Call("create_elements", new()
+            {
+                ["document_token"] = token,
+                ["spec"] = new JsonArray(new JsonObject { ["kind"] = "level", ["source_id"] = source, ["name"] = source, ["elevation_m"] = 321.123 })
+            });
             Assert.True(created["success"]!.GetValue<bool>(), created.ToJsonString());
             uid = created["results"]![0]!["unique_id"]!.ToString();
             var filter = new JsonObject { ["source_id"] = source, ["fields"] = new JsonArray("unique_id", "name", "elevation_m") };
-            var before = await Call("capture_snapshot", new() { ["filter"] = filter.DeepClone() });
+            var before = await Call("capture_snapshot", new()
+            {
+                ["filter"] = filter.DeepClone()
+            });
             var snapshotId = before["snapshot_id"]!.ToString();
-            var plan = await Call("preview_batch", new() { ["document_token"] = token, ["save"] = false,
-                ["actions"] = new JsonArray(new JsonObject { ["operation"] = "modify", ["id"] = uid, ["changes"] = new JsonObject { ["name"] = source + "-applied" } }) });
+            var plan = await Call("preview_batch", new()
+            {
+                ["document_token"] = token,
+                ["save"] = false,
+                ["actions"] = new JsonArray(new JsonObject { ["operation"] = "modify", ["id"] = uid, ["changes"] = new JsonObject { ["name"] = source + "-applied" } })
+            });
             Assert.Equal("preview", plan["status"]!.ToString());
-            Assert.True((await Call("read_snapshot", new() { ["snapshot_id"] = snapshotId }))["success"]!.GetValue<bool>());
-            var applied = await Call("apply_plan", new() { ["document_token"] = token, ["plan_id"] = plan["plan_id"]!.ToString() });
+            Assert.True((await Call("read_snapshot", new()
+            {
+                ["snapshot_id"] = snapshotId
+            }))["success"]!.GetValue<bool>());
+            var applied = await Call("apply_plan", new()
+            {
+                ["document_token"] = token,
+                ["plan_id"] = plan["plan_id"]!.ToString()
+            });
             Assert.True(applied["success"]!.GetValue<bool>(), applied.ToJsonString());
-            Assert.False((await Call("read_snapshot", new() { ["snapshot_id"] = snapshotId }))["success"]!.GetValue<bool>());
-            Assert.False((await Call("apply_plan", new() { ["document_token"] = token, ["plan_id"] = plan["plan_id"]!.ToString() }))["success"]!.GetValue<bool>());
-            var after = await Call("capture_snapshot", new() { ["filter"] = filter.DeepClone() });
-            var diff = await Call("diff_snapshots", new() { ["before_id"] = snapshotId, ["after_id"] = after["snapshot_id"]!.ToString() });
+            Assert.False((await Call("read_snapshot", new()
+            {
+                ["snapshot_id"] = snapshotId
+            }))["success"]!.GetValue<bool>());
+            Assert.False((await Call("apply_plan", new()
+            {
+                ["document_token"] = token,
+                ["plan_id"] = plan["plan_id"]!.ToString()
+            }))["success"]!.GetValue<bool>());
+            var after = await Call("capture_snapshot", new()
+            {
+                ["filter"] = filter.DeepClone()
+            });
+            var diff = await Call("diff_snapshots", new()
+            {
+                ["before_id"] = snapshotId,
+                ["after_id"] = after["snapshot_id"]!.ToString()
+            });
             Assert.Contains(uid, diff["changed"]!.AsArray().Select(n => n!.ToString()));
         }
         finally
@@ -94,7 +128,11 @@ public sealed class LiveRevitTests
             // Only the exact element created by this test may be removed. Never save automatically.
             if (uid is not null)
             {
-                var deleted = await Call("delete_elements", new() { ["document_token"] = token, ["ids"] = new JsonArray(uid) });
+                var deleted = await Call("delete_elements", new()
+                {
+                    ["document_token"] = token,
+                    ["ids"] = new JsonArray(uid)
+                });
                 Assert.True(deleted["success"]!.GetValue<bool>(), "Temporary level cleanup failed: " + deleted.ToJsonString());
             }
         }

@@ -15,11 +15,17 @@ public partial class ControlPanelWindow : Window
     private PanelState state = null!;
     public ControlPanelWindow(Func<PanelState> read, Action select, Action<DesktopClient, string> connect)
     {
-        InitializeComponent(); this.read = read; this.select = select; this.connect = connect;
+        InitializeComponent();
+        this.read = read;
+        this.select = select;
+        this.connect = connect;
         Refresh();
-        if (!state.CanSelect) FeedbackText.Text = "Ouvrez un projet enregistré pour commencer.";
-        else if (state.ServerExecutable is null) FeedbackText.Text = "Le serveur installé est introuvable. Relancez l’installateur.";
-        else if (state.IsTarget) FeedbackText.Text = "Choisissez votre assistant, puis configurez la connexion.";
+        if (!state.CanSelect)
+            FeedbackText.Text = "Ouvrez un projet enregistré pour commencer.";
+        else if (state.ServerExecutable is null)
+            FeedbackText.Text = "Le serveur installé est introuvable. Relancez l’installateur.";
+        else if (state.IsTarget)
+            FeedbackText.Text = "Choisissez votre assistant, puis configurez la connexion.";
     }
     private string Profile => ProfileChoice.SelectedIndex switch { 0 => "inspection", 1 => "workflow", _ => "modeling" };
     private void ClosePanel(object sender, RoutedEventArgs args) => Close();
@@ -30,7 +36,8 @@ public partial class ControlPanelWindow : Window
         VersionText.Text = "Dreamsign MCP · " + ToolCatalog.Version;
         ActiveProjectText.Text = state.ActiveProject;
         ActiveProjectText.ToolTip = state.ActiveProject;
-        ActivePathText.Text = state.ActivePath; ActivePathText.ToolTip = state.ActivePath;
+        ActivePathText.Text = state.ActivePath;
+        ActivePathText.ToolTip = state.ActivePath;
         UseProjectButton.IsEnabled = state.CanSelect;
         UseProjectButton.ToolTip = state.CanSelect ? "Autoriser le MCP à utiliser ce projet." : "Ouvrez un projet et enregistrez-le au format RVT.";
         TargetText.Text = state.IsTarget ? "✓ Ce projet est la cible du MCP." : "Cible actuelle : " + state.TargetProject;
@@ -48,12 +55,17 @@ public partial class ControlPanelWindow : Window
     }
     private void Run(Action action)
     {
-        try { action(); Refresh(); }
+        try
+        {
+            action();
+            Refresh();
+        }
         catch (Exception error) when (error is not OutOfMemoryException) { FeedbackText.Text = "Action interrompue : " + error.Message; }
     }
     private void SelectProject(object sender, RoutedEventArgs args) => Run(() =>
     {
-        select(); FeedbackText.Text = "Projet sélectionné. Activer un autre fichier ne changera pas cette autorisation.";
+        select();
+        FeedbackText.Text = "Projet sélectionné. Activer un autre fichier ne changera pas cette autorisation.";
     });
     private void ConnectClient(object sender, RoutedEventArgs args) => Run(() =>
     {
@@ -70,12 +82,19 @@ public partial class ControlPanelWindow : Window
     });
     private void CopyConfiguration(object sender, RoutedEventArgs args) => Run(() =>
     {
-        if (state.ServerExecutable is null) throw new InvalidOperationException("Installez d’abord le serveur.");
-        var configuration = new JsonObject { ["mcpServers"] = new JsonObject { [ClientIntegration.EntryName] = new JsonObject
+        if (state.ServerExecutable is null)
+            throw new InvalidOperationException("Installez d’abord le serveur.");
+        var configuration = new JsonObject
         {
-            ["command"] = state.ServerExecutable,
-            ["args"] = new JsonArray(ClientIntegration.Arguments(state.DataDirectory, Profile).Select(a => (JsonNode)JsonValue.Create(a)!).ToArray())
-        } } };
+            ["mcpServers"] = new JsonObject
+            {
+                [ClientIntegration.EntryName] = new JsonObject
+                {
+                    ["command"] = state.ServerExecutable,
+                    ["args"] = new JsonArray(ClientIntegration.Arguments(state.DataDirectory, Profile).Select(a => (JsonNode)JsonValue.Create(a)!).ToArray())
+                }
+            }
+        };
         Clipboard.SetText(configuration.ToJsonString(new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
         FeedbackText.Text = "Configuration copiée. Ajoutez-la à votre client compatible MCP.";
     });

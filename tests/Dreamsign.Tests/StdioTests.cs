@@ -18,7 +18,8 @@ public sealed class StdioTests
         try
         {
             var executable = Environment.GetEnvironmentVariable("DREAMSIGN_TEST_SERVER_EXE");
-            if (executable is not null && !File.Exists(executable)) throw new InvalidOperationException("Published server executable not found");
+            if (executable is not null && !File.Exists(executable))
+                throw new InvalidOperationException("Published server executable not found");
             var transport = new StdioClientTransport(new()
             {
                 Name = "Dreamsign integration test",

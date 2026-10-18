@@ -7,7 +7,11 @@ namespace Dreamsign.Tests;
 public sealed class InstallationTests : IDisposable
 {
     private readonly string directory = Path.Combine(Path.GetTempPath(), "Dreamsign.Tests", Guid.NewGuid().ToString("N"));
-    public void Dispose() { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
+    public void Dispose()
+    {
+        if (Directory.Exists(directory))
+            Directory.Delete(directory, true);
+    }
 
     [Fact]
     public void InstallEscapesPathsAndReplacementRequiresExplicitFlag()

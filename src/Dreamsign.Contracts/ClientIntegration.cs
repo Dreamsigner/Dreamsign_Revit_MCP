@@ -6,7 +6,10 @@ using Tomlyn.Model;
 
 namespace Dreamsign.Contracts;
 
-public enum DesktopClient { Codex, ClaudeDesktop, Cursor }
+public enum DesktopClient
+{
+    Codex, ClaudeDesktop, Cursor
+}
 public sealed record ClientConfigurationResult(string Path, string? Backup, string EntryName);
 
 public static class ClientIntegration
@@ -38,10 +41,12 @@ public static class ClientIntegration
 
     public static bool Remove(DesktopClient client, string path, string executable, string dataDirectory)
     {
-        if (!File.Exists(path)) return false;
+        if (!File.Exists(path))
+            return false;
         var text = File.ReadAllText(path);
         var (updated, entry) = Transform(client, text, executable, [], remove: true);
-        if (entry == "") return false;
+        if (entry == "")
+            return false;
         Write(path, updated, dataDirectory);
         return true;
     }
@@ -68,16 +73,20 @@ public static class ClientIntegration
     {
         if (client == DesktopClient.Codex)
         {
-            if (Toml.Parse(text).HasErrors) throw new ArgumentException("Configuration TOML invalide ; le fichier existant est conservé.");
+            if (Toml.Parse(text).HasErrors)
+                throw new ArgumentException("Configuration TOML invalide ; le fichier existant est conservé.");
             var root = Toml.ToModel(text);
-            if (root.TryGetValue("mcp_servers", out var value) && value is not TomlTable) throw new InvalidOperationException("Configuration MCP invalide.");
+            if (root.TryGetValue("mcp_servers", out var value) && value is not TomlTable)
+                throw new InvalidOperationException("Configuration MCP invalide.");
             var servers = value as TomlTable ?? new TomlTable();
             var key = servers.ContainsKey(EntryName) ? EntryName : servers.TryGetValue("astra_revit", out var legacy) && legacy is TomlTable old && Owned(old.TryGetValue("command", out var oldCommand) ? oldCommand?.ToString() : null, old.TryGetValue("args", out var a) ? a as System.Collections.IEnumerable : null) ? "astra_revit" : EntryName;
             var existing = servers.TryGetValue(key, out var found) ? found as TomlTable ?? throw new InvalidOperationException("Entrée MCP invalide.") : new TomlTable();
-            existing.TryGetValue("command", out var command); existing.TryGetValue("args", out var arguments);
+            existing.TryGetValue("command", out var command);
+            existing.TryGetValue("args", out var arguments);
             if (remove)
             {
-                if (!string.Equals(command?.ToString(), executable, StringComparison.OrdinalIgnoreCase)) return (text, "");
+                if (!string.Equals(command?.ToString(), executable, StringComparison.OrdinalIgnoreCase))
+                    return (text, "");
                 servers.Remove(key);
             }
             else
@@ -85,8 +94,12 @@ public static class ClientIntegration
                 if (found is not null && !Owned(command?.ToString(), arguments as System.Collections.IEnumerable))
                     throw new InvalidOperationException("Cette entrée appartient à un autre serveur ; aucun remplacement effectué.");
                 existing["command"] = executable;
-                var array = new TomlArray(); foreach (var arg in args) array.Add(arg);
-                existing["args"] = array; existing["enabled"] = true; servers[key] = existing;
+                var array = new TomlArray();
+                foreach (var arg in args)
+                    array.Add(arg);
+                existing["args"] = array;
+                existing["enabled"] = true;
+                servers[key] = existing;
             }
             root["mcp_servers"] = servers;
             return (Toml.FromModel(root), key);
@@ -97,21 +110,26 @@ public static class ClientIntegration
         var server = entries[name]?.AsObject() ?? new JsonObject();
         if (remove)
         {
-            if (!string.Equals(server["command"]?.ToString(), executable, StringComparison.OrdinalIgnoreCase)) return (text, "");
+            if (!string.Equals(server["command"]?.ToString(), executable, StringComparison.OrdinalIgnoreCase))
+                return (text, "");
             entries.Remove(name);
         }
         else
         {
             if (entries.ContainsKey(name) && !Owned(server["command"]?.ToString(), server["args"]?.AsArray()))
                 throw new InvalidOperationException("Cette entrée appartient à un autre serveur ; aucun remplacement effectué.");
-            server["command"] = executable; server["args"] = new JsonArray(args.Select(a => (JsonNode)JsonValue.Create(a)!).ToArray()); entries[name] = server;
+            server["command"] = executable;
+            server["args"] = new JsonArray(args.Select(a => (JsonNode)JsonValue.Create(a)!).ToArray());
+            entries[name] = server;
         }
-        if (json["mcpServers"] is null) json["mcpServers"] = entries;
+        if (json["mcpServers"] is null)
+            json["mcpServers"] = entries;
         return (json.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), name);
     }
     private static bool Owned(string? command, System.Collections.IEnumerable? args)
     {
-        if (Path.GetFileName(command) == "Dreamsign.Revit.Mcp.exe") return true;
+        if (Path.GetFileName(command) == "Dreamsign.Revit.Mcp.exe")
+            return true;
         return Path.GetFileName(command) is "node" or "node.exe" && args is not null &&
             args.Cast<object?>().Any(a => a?.ToString()?.Replace('\\', '/').EndsWith("/AstraRevitBridge/server.mjs", StringComparison.OrdinalIgnoreCase) == true);
     }
@@ -120,7 +138,8 @@ public static class ClientIntegration
         string? backup = null;
         if (File.Exists(path))
         {
-            var directory = Path.Combine(dataDirectory, "backups"); Directory.CreateDirectory(directory);
+            var directory = Path.Combine(dataDirectory, "backups");
+            Directory.CreateDirectory(directory);
             backup = Path.Combine(directory, "Dreamsign_MCP_" + Guid.NewGuid().ToString("N") + Path.GetExtension(path));
             File.Copy(path, backup);
         }
@@ -155,7 +174,8 @@ public static class LocalSettings
         ValidServer(machineServer) ? machineServer : UserInstalledServer(dataDirectory);
     public static string? MachineServer()
     {
-        if (!OperatingSystem.IsWindows()) return null;
+        if (!OperatingSystem.IsWindows())
+            return null;
         using var machine = Microsoft.Win32.RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.LocalMachine, Microsoft.Win32.RegistryView.Registry64);
         using var key = machine.OpenSubKey(@"SOFTWARE\Dreamsigner\RevitMCP");
         var executable = key?.GetValue("Server") as string;
@@ -164,7 +184,8 @@ public static class LocalSettings
     public static string? UserInstalledServer(string dataDirectory)
     {
         var path = Path.Combine(dataDirectory, "installation.json");
-        if (!File.Exists(path)) return null;
+        if (!File.Exists(path))
+            return null;
         var executable = JsonNode.Parse(File.ReadAllText(path))?["executable"]?.ToString();
         return ValidServer(executable) ? executable : null;
     }

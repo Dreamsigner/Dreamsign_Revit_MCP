@@ -26,7 +26,8 @@ namespace AstraRevitBridge
                         && path.EndsWith(".rvt", StringComparison.OrdinalIgnoreCase) && File.Exists(path);
                     BridgeTarget target = null;
                     var store = new StateStore(directory);
-                    if (File.Exists(store.StatePath)) target = store.Target;
+                    if (File.Exists(store.StatePath))
+                        target = store.Target;
                     bool same = valid && target != null && target.Document == document.Title &&
                         (!target.Pid.HasValue || target.Pid.Value == Environment.ProcessId) &&
                         string.Equals(Path.GetFullPath(target.Path), Path.GetFullPath(path), StringComparison.OrdinalIgnoreCase);
@@ -38,7 +39,8 @@ namespace AstraRevitBridge
                 void Select()
                 {
                     var document = ui.ActiveUIDocument?.Document;
-                    if (document == null) throw new ArgumentException("Ouvrez un projet Revit.");
+                    if (document == null)
+                        throw new ArgumentException("Ouvrez un projet Revit.");
                     new StateStore(directory).SelectProject(document.Title, document.PathName, Environment.ProcessId, document.IsFamilyDocument);
                 }
                 void Connect(DesktopClient client, string profile)

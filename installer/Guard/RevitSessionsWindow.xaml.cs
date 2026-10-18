@@ -21,7 +21,11 @@ public partial class RevitSessionsWindow : Window
     {
         var snapshot = scan();
         var list = string.Join("\n", snapshot.Sessions);
-        if (list != lastList) { SessionList.ItemsSource = snapshot.Sessions; lastList = list; }
+        if (list != lastList)
+        {
+            SessionList.ItemsSource = snapshot.Sessions;
+            lastList = list;
+        }
         ContinueButton.IsEnabled = snapshot.CanContinue;
         StatusText.Text = snapshot.Error ?? (snapshot.CanContinue
             ? "Toutes les sessions Revit sont fermées. Vous pouvez continuer."
@@ -30,7 +34,8 @@ public partial class RevitSessionsWindow : Window
     private void ContinueClick(object sender, RoutedEventArgs e)
     {
         RefreshSessions();
-        if (ContinueButton.IsEnabled) DialogResult = true;
+        if (ContinueButton.IsEnabled)
+            DialogResult = true;
     }
     private void CancelClick(object sender, RoutedEventArgs e) => Close();
 }

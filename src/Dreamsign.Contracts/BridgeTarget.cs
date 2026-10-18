@@ -11,7 +11,8 @@ public sealed record BridgeTarget(string Document, string Path, int? Pid = null)
     {
         if (string.IsNullOrWhiteSpace(Document) || !System.IO.Path.IsPathFullyQualified(Path))
             throw new ArgumentException("Explicit project name and absolute path required");
-        if (Pid is <= 0) throw new ArgumentException("PID must be positive or null");
+        if (Pid is <= 0)
+            throw new ArgumentException("PID must be positive or null");
     }
 }
 

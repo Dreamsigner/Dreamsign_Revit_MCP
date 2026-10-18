@@ -6,7 +6,9 @@ public sealed record ToolDefinition(string Name, string Description, JsonObject 
 {
     public JsonObject ToJson() => new()
     {
-        ["name"] = Name, ["description"] = Description, ["inputSchema"] = Schema.DeepClone(),
+        ["name"] = Name,
+        ["description"] = Description,
+        ["inputSchema"] = Schema.DeepClone(),
         ["annotations"] = new JsonObject { ["readOnlyHint"] = ReadOnly, ["openWorldHint"] = false }
     };
 }
@@ -23,7 +25,8 @@ public static class ToolCatalog
         ["inspection"] = Base,
         ["workflow"] = [.. Base, "save_project", "run_workflow", "apply_plan", "set_window_sills", "assign_marks", "tag_rooms"],
         ["modeling"] = [.. Base, "save_project", "create_elements", "modify_elements", "delete_elements", "apply_plan", "set_window_sills", "assign_marks", "tag_rooms"],
-        ["diagnostic"] = [.. Base, "create_test_project"], ["full"] = null
+        ["diagnostic"] = [.. Base, "create_test_project"],
+        ["full"] = null
     };
     private static readonly JsonArray Definitions = Load();
     private static JsonArray Load()
@@ -39,7 +42,8 @@ public static class ToolCatalog
         ?? throw new ArgumentException("Unknown tool: " + name);
     public static IReadOnlyList<ToolDefinition> ForProfile(string profile)
     {
-        if (!Profiles.TryGetValue(profile, out var selected)) throw new ArgumentException("Unknown MCP profile: " + profile);
+        if (!Profiles.TryGetValue(profile, out var selected))
+            throw new ArgumentException("Unknown MCP profile: " + profile);
         return selected is null ? All : All.Where(t => selected.Contains(t.Name, StringComparer.Ordinal)).ToArray();
     }
     public static IReadOnlyList<string> Commands => All.Where(t => t.Name is not ("discover_instances" or "get_project_state")).Select(t => t.Name).ToArray();

@@ -15,13 +15,20 @@ public sealed class RuntimeTests : IDisposable
         store.Configure(Target);
         return store;
     }
-    public void Dispose() { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
+    public void Dispose()
+    {
+        if (Directory.Exists(directory))
+            Directory.Delete(directory, true);
+    }
 
     [Fact]
     public async Task StaleConfiguredPidIsReplacedByDiscoveredPid()
     {
         var fake = new FakeTransport((op, a, t) => Task.FromResult(new JsonObject { ["success"] = t.Pid == 7, ["document"] = Target.Document, ["path"] = Target.Path, ["bridge_version"] = "0.3.0" }), [7]);
-        var result = await TargetResolver.ResolveAsync(Target with { Pid = 99 }, fake);
+        var result = await TargetResolver.ResolveAsync(Target with
+        {
+            Pid = 99
+        }, fake);
         Assert.True(result["success"]!.GetValue<bool>());
         Assert.Equal(7, result["pid"]!.GetValue<int>());
     }
@@ -31,7 +38,10 @@ public sealed class RuntimeTests : IDisposable
     {
         var fake = new FakeTransport((op, a, t) => Task.FromResult(new JsonObject { ["success"] = true, ["document"] = Target.Document, ["path"] = Target.Path, ["bridge_version"] = "0.4.0" }), [7, 8]);
         var runtime = new BridgeRuntime(Store(), fake, "full");
-        var result = await runtime.HandleAsync("save_project", new() { ["document_token"] = "t" });
+        var result = await runtime.HandleAsync("save_project", new()
+        {
+            ["document_token"] = "t"
+        });
         Assert.Equal("AMBIGUOUS_TARGET", result["code"]!.GetValue<string>());
         Assert.All(fake.Calls, call => Assert.Equal("get_active_document", call.Operation));
         var wrong = new FakeTransport((op, a, t) => Task.FromResult(new JsonObject { ["success"] = true, ["document"] = Target.Document, ["path"] = @"C:\Other\ExampleProject.rvt" }), [7]);
@@ -54,7 +64,12 @@ public sealed class RuntimeTests : IDisposable
         var fake = Successful((op, a) => new JsonObject { ["success"] = true, ["status"] = "preview", ["plan_id"] = "p", ["actions"] = new JsonArray(new JsonObject { ["large"] = "data" }), ["before"] = new JsonArray(), ["request_id"] = "../../outside" });
         var store = Store();
         var runtime = new BridgeRuntime(store, fake, "full");
-        var result = await runtime.HandleAsync("set_window_sills", new() { ["document_token"] = "t", ["filter"] = new JsonObject(), ["value_m"] = 0.8 });
+        var result = await runtime.HandleAsync("set_window_sills", new()
+        {
+            ["document_token"] = "t",
+            ["filter"] = new JsonObject(),
+            ["value_m"] = 0.8
+        });
         Assert.Equal("p", result["plan_id"]!.GetValue<string>());
         Assert.Null(result["actions"]);
         Assert.Null(result["before"]);
@@ -68,7 +83,10 @@ public sealed class RuntimeTests : IDisposable
     public async Task TimeoutIsReturnedWithoutRetry()
     {
         var fake = Successful((op, a) => ToolCatalog.Error("TIMEOUT_OUTCOME_UNKNOWN", "Inspect before retry"));
-        var result = await new BridgeRuntime(Store(), fake, "full").HandleAsync("save_project", new() { ["document_token"] = "t" });
+        var result = await new BridgeRuntime(Store(), fake, "full").HandleAsync("save_project", new()
+        {
+            ["document_token"] = "t"
+        });
         Assert.Equal("TIMEOUT_OUTCOME_UNKNOWN", result["code"]!.GetValue<string>());
         Assert.Single(fake.Calls, c => c.Operation == "save_project");
     }
@@ -79,7 +97,11 @@ public sealed class RuntimeTests : IDisposable
     public async Task SaveFailureReportsWhetherChangesWereApplied(int created, bool expected)
     {
         var fake = Successful((op, a) => new JsonObject { ["success"] = false, ["code"] = "SAVE_FAILED", ["created"] = created });
-        var result = await new BridgeRuntime(Store(), fake, "full").HandleAsync("apply_plan", new() { ["document_token"] = "t", ["plan_id"] = "p" });
+        var result = await new BridgeRuntime(Store(), fake, "full").HandleAsync("apply_plan", new()
+        {
+            ["document_token"] = "t",
+            ["plan_id"] = "p"
+        });
         Assert.Equal(expected, result["changes_applied"]!.GetValue<bool>());
     }
 
@@ -87,7 +109,10 @@ public sealed class RuntimeTests : IDisposable
     public async Task OlderBridgeCannotReceiveFeatureCalls()
     {
         var fake = new FakeTransport((op, a, t) => Task.FromResult(new JsonObject { ["success"] = true, ["document"] = Target.Document, ["path"] = Target.Path, ["bridge_version"] = "0.2.0" }), [7]);
-        var result = await new BridgeRuntime(Store(), fake, "full").HandleAsync("capture_snapshot", new() { ["filter"] = new JsonObject() });
+        var result = await new BridgeRuntime(Store(), fake, "full").HandleAsync("capture_snapshot", new()
+        {
+            ["filter"] = new JsonObject()
+        });
         Assert.Equal("UPGRADE_REQUIRED", result["code"]!.GetValue<string>());
         Assert.All(fake.Calls, c => Assert.Equal("get_active_document", c.Operation));
     }

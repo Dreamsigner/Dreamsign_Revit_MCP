@@ -15,9 +15,14 @@ public static class Program
         try
         {
             var options = CommandOptions.Parse(args);
-            if (options.Command == "help") { Console.WriteLine(Help); return 0; }
+            if (options.Command == "help")
+            {
+                Console.WriteLine(Help);
+                return 0;
+            }
             var store = new StateStore(options.DataDirectory);
-            if (options.Command != "serve") return await Commands.RunAsync(options, store);
+            if (options.Command != "serve")
+                return await Commands.RunAsync(options, store);
             var runtime = new BridgeRuntime(store, new NamedPipeTransport(), options.Profile);
             var tools = ToolCatalog.ForProfile(options.Profile).Select(t => JsonSerializer.Deserialize<Tool>(t.ToJson().ToJsonString())!).ToArray();
             var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings { ContentRootPath = AppContext.BaseDirectory });
